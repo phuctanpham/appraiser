@@ -1,10 +1,7 @@
-.validation-tab {
-  padding: 1rem;
+.valuation-tab-container {
+  padding: 20px;
 }
 
-.api-invalid-message {
-  text-align: center;
-  padding: 2rem;
-  background-color: rgba(255, 255, 255, 0.05);
-  border-radius: 8px;
+.valuation-result {
+  margin-top: 20px;
 }

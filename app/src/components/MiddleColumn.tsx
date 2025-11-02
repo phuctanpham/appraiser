@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import DetailTab from './DetailTab';
-import ValidationTab from './ValidationTab';
+import ValuationTab from './ValuationTab';
 import './MiddleColumn.css';
 
 interface CellItem {
@@ -56,17 +56,17 @@ export default function MiddleColumn({
           Detail
         </button>
         <button
-          className={`tab-button ${activeTab === 'validation' ? 'active' : ''}`}
-          onClick={() => setActiveTab('validation')}
+          className={`tab-button ${activeTab === 'valuation' ? 'active' : ''}`}
+          onClick={() => setActiveTab('valuation')}
         >
-          Validation
+          Valuation
         </button>
       </div>
       <div className="tab-content">
         {activeTab === 'detail' && (
           <DetailTab selectedItem={selectedItem} onUpdate={handleUpdate} />
         )}
-        {activeTab === 'validation' && <ValidationTab apiValid={apiValid} />}
+        {activeTab === 'valuation' && <ValuationTab apiValid={apiValid} />}
       </div>
     </div>
   );
