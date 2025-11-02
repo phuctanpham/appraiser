@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react';
 import InfoCard from './InfoCard';
 import GeographyCard from './GeographyCard';
 import './ValuationTab.css';
+import './Override.css'; // Import override styles
 
 interface ValuationData {
   aiModel: string;

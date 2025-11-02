@@ -1,0 +1,39 @@
+
+.infographic-card.compact {
+  background-color: #323232;
+  border-color: #404040;
+  color: #fff;
+}
+
+.geography-card {
+  background-color: #323232;
+  border-color: #404040;
+  color: #fff;
+}
+
+.map-view-container {
+  background-color: #404040;
+}
+
+.nearby-list-container {
+  background-color: #323232;
+  border-color: #404040;
+}
+
+.nearby-list-container h4 {
+  background-color: #323232;
+  border-color: #404040;
+  color: #fff;
+}
+
+.nearby-item {
+  border-color: #404040;
+}
+
+.nearby-address {
+  color: #ccc;
+}
+
+.nearby-value {
+  color: #fff;
+}
