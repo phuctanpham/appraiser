@@ -2,6 +2,7 @@
 import { useState, useEffect } from 'react';
 import InfoCard from './InfoCard';
 import GeographyCard from './GeographyCard';
+import ChartCard from './ChartCard'; // Import the new ChartCard component
 import './ValuationTab.css';
 import './Override.css'; // Import override styles
 
@@ -69,6 +70,7 @@ export default function ValuationTab({ apiValid }: ValuationTabProps) {
   return (
     <div className="valuation-tab">
       <InfoCard valuation={selectedItem.valuation} />
+      <ChartCard baseValue={selectedItem.valuation.totalValue} />
       <GeographyCard
         lat={selectedItem.lat}
         lng={selectedItem.lng}
