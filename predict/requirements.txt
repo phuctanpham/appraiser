@@ -1,0 +1,7 @@
+fastapi[all]
+scikit-learn
+pandas
+joblib
+lightgbm
+python-dotenv
+tabulate
