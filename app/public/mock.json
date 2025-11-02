@@ -20,37 +20,48 @@
     "chatHistory": [
       {
         "sender": "bot",
-        "message": "Welcome to ValuProphet. I am your virtual appraisal assistant. How can I help you with item C-12345?",
+        "message": "Welcome, John. Your initial property valuation is complete. To proceed with your lending application, please upload the necessary documents.",
         "timestamp": "2024-07-28T10:00:00Z"
       },
       {
         "sender": "user",
-        "message": "What is the status of this item?",
+        "message": "Great! What documents are required?",
         "timestamp": "2024-07-28T10:05:00Z"
       },
       {
         "sender": "bot",
-        "message": "This item is active and verified. We have completed the initial valuation. To proceed with a lending proposal, please upload the required documents.",
+        "message": "I need the Certificate of Title, a certified Floor Plan, and your latest Property Tax Assessment.",
         "timestamp": "2024-07-28T10:06:00Z"
       },
       {
         "sender": "user",
-        "message": "I've just uploaded the Certificate of Title and the Floor Plan.",
+        "message": "Understood. I'm uploading the Certificate of Title and Floor Plan now.",
         "timestamp": "2024-07-29T14:30:00Z"
       },
       {
         "sender": "bot",
-        "message": "Thank you, John. Documents received. Our team will review them and get back to you with a lending proposal within 2 business days.",
+        "message": "Received: Certificate_of_Title.pdf and Floor_Plan.pdf. Both look good. Just need the Property Tax Assessment to complete your file.",
         "timestamp": "2024-07-29T14:32:00Z"
+      },
+      {
+        "sender": "user",
+        "message": "Just uploaded the tax assessment.",
+        "timestamp": "2024-07-30T11:00:00Z"
+      },
+      {
+        "sender": "bot",
+        "message": "Excellent! All documents are verified. Your application is now complete and has been forwarded to our lending team for review. You will be notified of their decision within 3-5 business days. Thank you for your cooperation!",
+        "timestamp": "2024-07-30T11:02:00Z"
       }
     ],
     "activityLogs": [
-      { "activity": "Lending proposal sent.", "timestamp": "2024-07-31T11:00:00Z" },
-      { "activity": "Appraiser team reviewed documents.", "timestamp": "2024-07-30T16:00:00Z" },
-      { "activity": "User uploaded 'Floor_Plan.pdf'.", "timestamp": "2024-07-29T14:29:00Z" },
+      { "activity": "Lending application submitted for final review.", "timestamp": "2024-07-30T11:02:00Z" },
+      { "activity": "User uploaded 'Property_Tax_Assessment_2024.pdf'.", "timestamp": "2024-07-30T10:59:00Z" },
+      { "activity": "Address updated from '123 Main Street' to '123 Main St'.", "timestamp": "2024-07-29T18:00:00Z" },
+      { "activity": "Owner name corrected from 'Jon Doe' to 'John Doe'.", "timestamp": "2024-07-29T17:45:00Z" },
+      { "activity": "User uploaded 'Floor_Plan_v2.pdf', replacing 'Floor_Plan_v1.pdf'.", "timestamp": "2024-07-29T14:29:00Z" },
       { "activity": "User uploaded 'Certificate_of_Title.pdf'.", "timestamp": "2024-07-29T14:28:00Z" },
       { "activity": "Valuation completed by AI model 'ValuProphet v2.1'.", "timestamp": "2024-07-28T09:00:00Z" },
-      { "activity": "Valuation request initiated.", "timestamp": "2024-07-28T08:30:00Z" },
       { "activity": "Item 'C-12345' created.", "timestamp": "2024-07-28T08:25:00Z" }
     ]
   },
@@ -60,7 +71,7 @@
     "address": "456 Oak Ave, Somewhere, USA",
     "certificateNumber": "C-67890",
     "owner": "Jane Smith",
-    "syncStatus": "pending",
+    "syncStatus": "failed",
     "valuation": {
       "aiModel": "ValuProphet v2.1",
       "confidenceScore": 0.89,
@@ -72,27 +83,56 @@
       }
     },
     "chatHistory": [
-       {
+      {
         "sender": "bot",
-        "message": "Welcome, Jane. Your property at 456 Oak Ave is currently pending verification. Please upload the necessary documents to proceed.",
-        "timestamp": "2024-07-30T09:15:00Z"
+        "message": "Welcome, Jane. Your property is pending verification. To proceed, please upload the Certificate of Title and a recent property tax assessment.",
+        "timestamp": "2024-07-25T09:15:00Z"
       },
       {
         "sender": "user",
-        "message": "What documents do you need?",
-        "timestamp": "2024-07-30T09:20:00Z"
+        "message": "I uploaded the title doc.",
+        "timestamp": "2024-07-26T11:20:00Z"
       },
       {
         "sender": "bot",
-        "message": "We require a copy of the Certificate of Title and a recent property tax assessment.",
-        "timestamp": "2024-07-30T09:21:00Z"
+        "message": "Thank you. The document you uploaded appears to be a scan of a utility bill, not the Certificate of Title. Please upload the correct document.",
+        "timestamp": "2024-07-26T11:22:00Z"
+      },
+      {
+        "sender": "user",
+        "message": "Sorry, my mistake. Here is the correct one.",
+        "timestamp": "2024-07-27T16:45:00Z"
+      },
+      {
+        "sender": "bot",
+        "message": "The Certificate of Title has been received. However, the owner's name on the certificate ('Jane Smyth') does not match the name in your profile ('Jane Smith'). Please clarify or update your profile.",
+        "timestamp": "2024-07-27T16:48:00Z"
+      },
+       {
+        "sender": "user",
+        "message": "It's a typo in my profile. How do I fix it?",
+        "timestamp": "2024-07-28T10:30:00Z"
+      },
+      {
+        "sender": "bot",
+        "message": "You can update your name in the 'Profile' section. After that, I will re-verify the document. Your application is currently on hold.",
+        "timestamp": "2024-07-28T10:32:00Z"
+      },
+      {
+        "sender": "bot",
+        "message": "Your lending application has been rejected due to incomplete documentation. Please re-apply when you have all the required materials.",
+        "timestamp": "2024-08-01T14:00:00Z"
       }
     ],
     "activityLogs": [
-      { "activity": "Awaiting document submission from owner.", "timestamp": "2024-07-30T09:15:00Z" },
-      { "activity": "Initial valuation completed by AI model 'ValuProphet v2.1'.", "timestamp": "2024-07-30T09:00:00Z" },
-      { "activity": "Valuation request initiated.", "timestamp": "2024-07-30T08:45:00Z" },
-      { "activity": "Item 'C-67890' created.", "timestamp": "2024-07-30T08:40:00Z" }
+      { "activity": "Lending application rejected. Reason: Incomplete documentation.", "timestamp": "2024-08-01T14:00:00Z" },
+      { "activity": "Application status changed to 'On Hold'.", "timestamp": "2024-07-27T16:48:00Z" },
+      { "activity": "User uploaded 'Title_Deed_Final.pdf'.", "timestamp": "2024-07-27T16:44:00Z" },
+      { "activity": "System flagged document 'Utility_Bill_July.pdf' as incorrect type.", "timestamp": "2024-07-26T11:22:00Z" },
+      { "activity": "User uploaded 'Utility_Bill_July.pdf'.", "timestamp": "2024-07-26T11:19:00Z" },
+      { "activity": "Re-application initiated.", "timestamp": "2024-07-25T09:14:00Z" },
+      { "activity": "Previous application rejected. Reason: Missing documents.", "timestamp": "2024-07-24T18:00:00Z" },
+      { "activity": "Item 'C-67890' created.", "timestamp": "2024-07-22T08:40:00Z" }
     ]
   }
 ]
