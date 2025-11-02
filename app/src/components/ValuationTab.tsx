@@ -13,9 +13,16 @@ interface ValuationData {
   };
 }
 
+interface NearbyValuation {
+  address: string;
+  value: number;
+}
+
 interface MockItem {
   id: string;
   valuation: ValuationData;
+  address: string;
+  nearbyValuations: NearbyValuation[];
 }
 
 interface ValuationTabProps {
@@ -24,6 +31,9 @@ interface ValuationTabProps {
 
 export default function ValuationTab({ apiValid }: ValuationTabProps) {
   const [valuationData, setValuationData] = useState<ValuationData | null>(null);
+  const [nearbyData, setNearbyData] = useState<NearbyValuation[] | null>(null);
+  const [address, setAddress] = useState<string | null>(null);
+  const [zoom, setZoom] = useState(15);
 
   useEffect(() => {
     if (!apiValid) {
@@ -32,6 +42,8 @@ export default function ValuationTab({ apiValid }: ValuationTabProps) {
         .then((data: MockItem[]) => {
           if (data && data.length > 0) {
             setValuationData(data[0].valuation);
+            setNearbyData(data[0].nearbyValuations);
+            setAddress(data[0].address);
           }
         })
         .catch(console.error);
@@ -55,22 +67,52 @@ export default function ValuationTab({ apiValid }: ValuationTabProps) {
             <span className="detail-value">{(data.confidenceScore * 100).toFixed(0)}%</span>
           </div>
           <div className="detail-item">
-            <span className="detail-label">Total Value ($)</span>
+            <span className="detail-label">Total Value (VND)</span>
             <div className="detail-value-focus">
-              <span>{new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(data.totalValue)}</span>
+              <span>{new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(data.totalValue)}</span>
               <span className={valueChangeClass}>
                 ({isIncrement ? '+' : ''}{data.valueChange.percent}%)
               </span>
             </div>
           </div>
           <div className="detail-item">
-            <span className="detail-label">Unit Value ($/m²)</span>
-            <span className="detail-value">{new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(data.unitValue)}</span>
+            <span className="detail-label">Unit Value (VND/m²)</span>
+            <span className="detail-value">{new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(data.unitValue)}</span>
           </div>
         </div>
       </div>
     );
   };
+
+  const renderNearbyValuations = (data: NearbyValuation[], currentAddress: string) => (
+    <div className="infographic-card">
+      <h2>Nearby Valuations</h2>
+      <div className="map-placeholder">
+        <p>Map of {currentAddress} will be displayed here.</p>
+        <div className="map-controls">
+          <button onClick={() => setZoom(z => Math.min(z + 1, 18))}>Zoom In</button>
+          <button onClick={() => setZoom(z => Math.max(z - 1, 10))}>Zoom Out</button>
+          <span>Zoom: {zoom}</span>
+        </div>
+      </div>
+      <table className="nearby-table">
+        <thead>
+          <tr>
+            <th>Address</th>
+            <th>Value (VND)</th>
+          </tr>
+        </thead>
+        <tbody>
+          {data.map((item, index) => (
+            <tr key={index}>
+              <td>{item.address}</td>
+              <td>{new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(item.value)}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  );
 
   return (
     <div className="valuation-tab">
@@ -80,7 +122,8 @@ export default function ValuationTab({ apiValid }: ValuationTabProps) {
         </div>
       ) : (
         <div className="guest-mode-view">
-           {valuationData ? renderValuationCard(valuationData) : <p>Loading guest data...</p>}
+          {valuationData ? renderValuationCard(valuationData) : <p>Loading guest data...</p>}
+          {nearbyData && address ? renderNearbyValuations(nearbyData, address) : <p>Loading nearby data...</p>}
         </div>
       )}
     </div>
