@@ -6,7 +6,17 @@
     "address": "123 Main St, Anytown, USA",
     "certificateNumber": "C-12345",
     "owner": "John Doe",
-    "syncStatus": "synced"
+    "syncStatus": "synced",
+    "valuation": {
+      "aiModel": "ValuProphet v2.1",
+      "confidenceScore": 0.95,
+      "totalValue": 1250000,
+      "unitValue": 5000,
+      "valueChange": {
+        "percent": 1.5,
+        "period": "month"
+      }
+    }
   },
   {
     "id": "item-2",
@@ -14,6 +24,16 @@
     "address": "456 Oak Ave, Somewhere, USA",
     "certificateNumber": "C-67890",
     "owner": "Jane Smith",
-    "syncStatus": "pending"
+    "syncStatus": "pending",
+    "valuation": {
+      "aiModel": "ValuProphet v2.1",
+      "confidenceScore": 0.89,
+      "totalValue": 850000,
+      "unitValue": 4250,
+      "valueChange": {
+        "percent": -0.5,
+        "period": "month"
+      }
+    }
   }
 ]
