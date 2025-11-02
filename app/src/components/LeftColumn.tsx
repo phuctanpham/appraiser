@@ -1,5 +1,7 @@
 
 import { useState } from 'react';
+import BotTab from './BotTab';
+import LogTab from './LogTab';
 import './LeftColumn.css';
 
 interface ChatMessage {
@@ -39,15 +41,6 @@ export default function LeftColumn({
   onNavigate,
 }: LeftColumnProps) {
   const [activeTab, setActiveTab] = useState<Tab>('chat');
-  const [chatMessage, setChatMessage] = useState('');
-
-  const handleSendMessage = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!chatMessage.trim()) return;
-    
-    console.log('Sending message:', chatMessage);
-    setChatMessage('');
-  };
 
   if (!selectedItem) {
     return (
@@ -100,50 +93,15 @@ export default function LeftColumn({
 
           <div className="tab-content">
             {activeTab === 'chat' ? (
-              <div className="chat-view">
-                <div className="chat-header">
-                  <h4>Chat with Bot</h4>
-                  <p className="chat-subtitle">Ask about {selectedItem.certificateNumber}</p>
-                </div>
-                <div className="chat-messages">
-                  {selectedItem.chatHistory?.map((msg, index) => (
-                    <div key={index} className={`chat-message ${msg.sender}`}>
-                      <div className="message-content">{msg.message}</div>
-                      <div className="message-timestamp">{new Date(msg.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</div>
-                    </div>
-                  ))}
-                </div>
-                <form className="chat-input-form" onSubmit={handleSendMessage}>
-                  <input
-                    type="text"
-                    placeholder="Type a message..."
-                    value={chatMessage}
-                    onChange={(e) => setChatMessage(e.target.value)}
-                    className="chat-input"
-                    aria-label="Chat message"
-                  />
-                  <button type="submit" className="btn btn-primary" aria-label="Send message">
-                    Send
-                  </button>
-                </form>
-              </div>
+              <BotTab
+                certificateNumber={selectedItem.certificateNumber}
+                chatHistory={selectedItem.chatHistory || []}
+              />
             ) : (
-              <div className="changelog-view">
-                <div className="changelog-header">
-                  <h4>Activity Log</h4>
-                  <p className="changelog-subtitle">{selectedItem.certificateNumber}</p>
-                </div>
-                <div className="changelog-entries">
-                  {selectedItem.activityLogs?.map((entry, index) => (
-                    <div key={index} className="changelog-entry">
-                      <div className="entry-action">{entry.activity}</div>
-                      <div className="entry-meta">
-                        <span className="entry-timestamp">{new Date(entry.timestamp).toLocaleString()}</span>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
+              <LogTab
+                certificateNumber={selectedItem.certificateNumber}
+                activityLogs={selectedItem.activityLogs || []}
+              />
             )}
           </div>
         </>
