@@ -36,7 +36,16 @@ function App() {
   
   const [items, setItems] = useState<CellItem[]>(() => {
     const savedItems = localStorage.getItem('items');
-    return savedItems ? JSON.parse(savedItems) : [];
+    if (savedItems) {
+      return JSON.parse(savedItems);
+    }
+    // Load mock data for guest mode on first load
+    if (authMode === 'guest') {
+      fetch('/mock.json')
+        .then(response => response.json())
+        .then(data => setItems(data));
+    }
+    return [];
   });
   
   const [selectedItemId, setSelectedItemId] = useState<string | null>(null);
@@ -123,6 +132,10 @@ function App() {
   };
 
   const handleAddItem = (newItem: Omit<CellItem, 'id' | 'syncStatus'>) => {
+    if (authMode === 'guest' && items.length >= 2) {
+      // Limit guest mode to 2 items
+      return;
+    }
     const item: CellItem = {
       id: `item-${Date.now()}`,
       ...newItem,
