@@ -1,76 +1,103 @@
 
-.valuation-tab .infographic-card {
+.valuation-tab .infographic-card-unified {
   background-color: #f9f9f9;
   border: 1px solid #e0e0e0;
   border-radius: 8px;
   padding: 16px;
+}
+
+.valuation-tab .valuation-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.valuation-tab .valuation-header h2 {
+  font-size: 1.2em;
+  color: #333;
+  margin: 0;
+}
+
+.valuation-tab .confidence-score {
+  font-size: 0.9em;
+  color: #555;
+}
+
+.valuation-tab .main-valuation-details {
+  display: flex;
+  justify-content: space-around;
   margin-bottom: 16px;
 }
 
-.valuation-tab .infographic-card h2 {
-  font-size: 1.2em;
-  margin-bottom: 12px;
-  color: #333;
-}
-
-.valuation-tab .valuation-details,
-.valuation-tab .nearby-table {
-  width: 100%;
-}
-
-.valuation-tab .detail-item {
-  display: flex;
-  justify-content: space-between;
-  padding: 8px 0;
+.valuation-tab .total-value, .valuation-tab .unit-value {
+  text-align: center;
 }
 
 .valuation-tab .detail-label {
   font-weight: 600;
   color: #555;
+  font-size: 0.9em;
 }
 
 .valuation-tab .detail-value-focus {
-  text-align: right;
+  font-size: 1.4em;
+  font-weight: bold;
+}
+
+.valuation-tab .detail-value {
+  font-size: 1.2em;
 }
 
 .valuation-tab .increment {
   color: #4CAF50;
+  font-size: 0.8em;
+  margin-left: 8px;
 }
 
 .valuation-tab .decrement {
   color: #F44336;
+  font-size: 0.8em;
+  margin-left: 8px;
 }
 
-.valuation-tab .map-placeholder {
-  height: 200px;
-  background-color: #e0e0e0;
+.valuation-tab .map-container {
+  height: 400px; 
+  width: 100%;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.valuation-tab .api-key-placeholder {
+  height: 100%;
   display: flex;
-  flex-direction: column;
   align-items: center;
   justify-content: center;
-  border-radius: 4px;
-  margin-bottom: 16px;
+  background-color: #f0f0f0;
+  text-align: center;
+  padding: 20px;
 }
 
-.valuation-tab .map-controls {
-  margin-top: 8px;
+.valuation-tab .marker {
+  padding: 4px 8px;
+  border-radius: 12px;
+  color: white;
+  font-size: 0.9em;
+  font-weight: bold;
+  white-space: nowrap;
 }
 
-.valuation-tab .map-controls button {
-  margin: 0 4px;
+.valuation-tab .marker-main {
+  background-color: #007bff; /* Blue for main property */
+  border: 2px solid #fff;
 }
 
-.valuation-tab .nearby-table {
-  border-collapse: collapse;
+.valuation-tab .marker-nearby {
+  background-color: #28a745; /* Green for nearby properties */
 }
 
-.valuation-tab .nearby-table th,
-.valuation-tab .nearby-table td {
-  padding: 8px;
-  text-align: left;
-  border-bottom: 1px solid #ddd;
-}
-
-.valuation-tab .nearby-table th {
-  background-color: #f2f2f2;
+/* Ensure the map fills the container */
+.valuation-tab .map-container > div {
+  height: 100%;
+  width: 100%;
 }
