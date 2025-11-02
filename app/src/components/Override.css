@@ -5,6 +5,23 @@
   color: #fff;
 }
 
+.total-value {
+  color: #64e3a3 !important;
+}
+
+.grid-item {
+  background-color: #404040 !important;
+  color: #fff !important;
+}
+
+.grid-label {
+  color: #ccc !important;
+}
+
+.grid-value {
+  color: #fff !important;
+}
+
 .geography-card {
   background-color: #323232;
   border-color: #404040;
