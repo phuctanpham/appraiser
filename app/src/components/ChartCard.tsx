@@ -54,7 +54,7 @@ export default function ChartCard({ valuationHistory }: ChartCardProps) {
 
   if (!valuationHistory) {
     return (
-        <div class="valuation-chart-card">
+        <div className="valuation-chart-card">
             <h2>Valuation Over Time</h2>
             <p>No valuation history available for this property.</p>
         </div>
