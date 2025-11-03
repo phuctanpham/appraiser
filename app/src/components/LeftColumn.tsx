@@ -32,16 +32,12 @@ interface LeftColumnProps {
   onNavigate?: () => void;
 }
 
-type Tab = 'chat' | 'activity';
-
 export default function LeftColumn({
   selectedItem,
   expanded = true,
   onToggleExpand,
   onNavigate,
 }: LeftColumnProps) {
-  const [activeTab, setActiveTab] = useState<Tab>('chat');
-
   if (!selectedItem) {
     return (
       <div className={`left-column ${expanded ? 'expanded' : 'collapsed'}`}>
@@ -53,7 +49,7 @@ export default function LeftColumn({
         {expanded && (
           <div className="empty-state">
             <h3>No Item Selected</h3>
-            <p>Select an item to view chat and activity</p>
+            <p>Select an item to view details</p>
             {onNavigate && (
               <button className="btn btn-primary" onClick={onNavigate}>
                 Go to Items
@@ -74,35 +70,22 @@ export default function LeftColumn({
       )}
       {expanded && (
         <>
-          <div className="tabs">
-            <button
-              className={`tab ${activeTab === 'chat' ? 'active' : ''}`}
-              onClick={() => setActiveTab('chat')}
-              aria-label="Chat tab"
-            >
-              Chat
-            </button>
-            <button
-              className={`tab ${activeTab === 'activity' ? 'active' : ''}`}
-              onClick={() => setActiveTab('activity')}
-              aria-label="Activity tab"
-            >
-              Activity
-            </button>
+          <div className="column-header">
+            <div className="tabs">
+              <button className="tab active" aria-label="Item tab">
+                Item
+              </button>
+            </div>
           </div>
-
           <div className="tab-content">
-            {activeTab === 'chat' ? (
-              <BotTab
-                certificateNumber={selectedItem.certificateNumber}
-                chatHistory={selectedItem.chatHistory || []}
-              />
-            ) : (
-              <LogTab
-                certificateNumber={selectedItem.certificateNumber}
-                activityLogs={selectedItem.activityLogs || []}
-              />
-            )}
+            <BotTab
+              certificateNumber={selectedItem.certificateNumber}
+              chatHistory={selectedItem.chatHistory || []}
+            />
+            <LogTab
+              certificateNumber={selectedItem.certificateNumber}
+              activityLogs={selectedItem.activityLogs || []}
+            />
           </div>
         </>
       )}

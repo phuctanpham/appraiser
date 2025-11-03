@@ -84,12 +84,13 @@ export default function MiddleColumn({
 
   return (
     <div className="middle-column">
-      <div className="tab-navigation">
+      <div className="column-header">
         <div className="tabs">
             <button
             className={`tab-button ${activeTab === 'detail' ? 'active' : ''}`}
             onClick={() => handleTabChange('detail')}
             >
+            {flags.DetailTab_editSwitch && <span className="gear-icon" onClick={() => setIsEditing(!isEditing)}></span>}
             Detail
             </button>
             <button
@@ -99,15 +100,6 @@ export default function MiddleColumn({
             Valuation
             </button>
         </div>
-        {activeTab === 'detail' && flags.DetailTab_editSwitch && (
-            <div className="edit-switch-container">
-                <label className="switch">
-                <input type="checkbox" checked={isEditing} onChange={() => setIsEditing(!isEditing)} />
-                <span className="slider round"></span>
-                </label>
-                <span>Edit Mode</span>
-            </div>
-        )}
       </div>
       <div className="tab-content">
         {activeTab === 'detail' && (
