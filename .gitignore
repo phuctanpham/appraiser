@@ -1,11 +1,78 @@
-# IDE-specific files
-.idx/
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+.venv/
+venv/
+
+# Node
+node_modules/
+npm-debug.log
+pnpm-debug.log
+yarn-error.log
+lerna-debug.log
+report.[0-9]*.[0-9]*.[0-9]*.[0-9]*.json
+.npm/
+.pnpm-store/
+.yarn/
+
+# Warp
+warp/node_modules/
+
+# Uploads & Media
+uploads/
+media/
+*.jpg
+*.jpeg
+*.png
+*.gif
+*.svg
+*.bmp
+*.tiff
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Environment variables
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+*.dev.vars
 
 # Logs
+*.log
 firebase-debug.log
 
-# Node dependencies
-node_modules/
+# Cloudflare Wrangler
+.wrangler/
 
-# Wrangler development environment variables
-.dev.vars
+# Other
+curl.sh
+.idx/
