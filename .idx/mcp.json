@@ -3,6 +3,10 @@
     "firebase": {
       "command": "npx",
       "args": ["-y", "firebase-tools@latest", "experimental:mcp"]
+    },
+    "claude": {
+      "command": "npm",
+      "args": ["-y", "--prefix", "./.idx/anthropic", "i", "anthropic-mcp-server@latest"]
     }
   }
 }
