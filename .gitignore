@@ -1,0 +1,11 @@
+# IDE-specific files
+.idx/
+
+# Logs
+firebase-debug.log
+
+# Node dependencies
+node_modules/
+
+# Wrangler development environment variables
+.dev.vars
