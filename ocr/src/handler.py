@@ -1,8 +1,8 @@
 import json
 import logging
 from typing import Dict, Any
-from .main import analyze_images
-from .utils.response import success_response, error_response
+from src.utils.analysis import analyze_images
+from src.utils.response import success_response, error_response
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -10,8 +10,11 @@ logger = logging.getLogger(__name__)
 def lambda_handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
     """AWS Lambda handler for OCR service"""
     try:
-        # Handle health check
-        if event.get('path') == '/health':
+        logger.info(f'Received event: {json.dumps(event)}')
+        
+        # Handle health check - check multiple path formats
+        path = event.get('rawPath') or event.get('path', '')
+        if path == '/health' or event.get('httpMethod') == 'GET':
             return success_response({
                 'status': 'ok',
                 'service': 'ocr',
@@ -19,7 +22,12 @@ def lambda_handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
             })
         
         # Parse request body
-        body = json.loads(event.get('body', '{}'))
+        body_str = event.get('body', '{}')
+        if isinstance(body_str, str):
+            body = json.loads(body_str)
+        else:
+            body = body_str
+            
         images_base64 = body.get('images', [])
         
         if not images_base64:
