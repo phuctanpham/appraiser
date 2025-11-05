@@ -1,4 +1,3 @@
-# main.py - Updated with preprocessing
 import os
 from dotenv import load_dotenv
 load_dotenv()
@@ -11,11 +10,11 @@ import boto3
 from datetime import datetime
 from io import BytesIO
 
-from backend.models import PropertyReport, PropertyImage, get_db
-from backend.schemas import PropertyReportCreate
-from backend.auth import get_current_user
-from backend.auth_routes import router as auth_router
-from backend.image_analysis_service import (
+# ✅ CHANGE: Use relative imports instead of backend.
+from models import PropertyReport, PropertyImage, get_db
+from schemas import PropertyReportCreate
+from auth_middleware import get_current_user
+from image_analysis_service import (
     analyze_images_to_property_form,
     convert_bytes_to_base64_for_analysis,
     compress_image_if_needed,
@@ -47,7 +46,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-app.include_router(auth_router)
+# (phucpt) app.include_router(auth_router)
 
 # AWS S3
 s3_client = boto3.client(
