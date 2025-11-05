@@ -17,11 +17,11 @@ client = openai.OpenAI(api_key=api_key)
 
 def analyze_with_gpt4v(image_base64_list):
     """
-    Analyzes a list of base64-encoded images with GPT-4V.
+    Analyzes a list of base64-encoded images with GPT-4 Vision.
     """
     try:
         response = client.chat.completions.create(
-            model="gpt-4-vision-preview",
+            model="gpt-4o",  # Updated to current model
             messages=[
                 {
                     "role": "user",
