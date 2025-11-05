@@ -13,6 +13,6 @@ CREATE TABLE IF NOT EXISTS users (
     updated_at INTEGER DEFAULT (strftime('%s', 'now'))
 );
 
-CREATE INDEX idx_users_email ON users(email);
-CREATE INDEX idx_users_verification_token ON users(verification_token);
-CREATE INDEX idx_users_reset_token ON users(reset_token);
+CREATE INDEX IF NOT EXISTS idx_users_email ON users(email);
+CREATE INDEX IF NOT EXISTS idx_users_verification_token ON users(verification_token);
+CREATE INDEX IF NOT EXISTS idx_users_reset_token ON users(reset_token);
