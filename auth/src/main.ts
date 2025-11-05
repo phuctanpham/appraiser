@@ -8,6 +8,7 @@ type Bindings = {
   EMAIL_API_KEY: string;
   EMAIL_FROM: string;
   FRONTEND_URL: string;
+  BACKEND_URL: string;
 };
 
 const app = new Hono<{ Bindings: Bindings }>();

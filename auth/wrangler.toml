@@ -1,10 +1,12 @@
-# auth/wrangler.toml
 name = "auth"
 main = "src/main.ts"
 compatibility_date = "2025-10-17"
 
 [vars]
 ENVIRONMENT = "production"
+FRONTEND_URL = "http://localhost:3000"
+BACKEND_URL = "http://localhost:8787"
+EMAIL_FROM = "noreply@yourdomain.com"
 
 [dev]
 ip = "127.0.0.1"
