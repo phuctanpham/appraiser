@@ -1,0 +1,132 @@
+openapi: 3.0.0
+info:
+  title: Warp API
+  version: 1.0.0
+  description: API for the Warp service
+servers:
+  - url: /api
+paths:
+  /ocr/health:
+    get:
+      summary: Health check for the OCR service
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  warp:
+                    type: string
+                  ocr:
+                    type: string
+                  ocrStatus:
+                    type: integer
+                  ocrData:
+                    type: object
+  /ocr/step-up/initiate:
+    post:
+      summary: Initiate Step-Up Authentication
+      description: Requires a standard logged-in user
+      responses:
+        '200':
+          description: Verification code sent
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+        '500':
+          description: Failed to initiate step-up authentication
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+  /ocr/step-up/verify:
+    post:
+      summary: Verify Step-Up Authentication
+      description: Requires a standard logged-in user + OTP
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                otp:
+                  type: string
+      responses:
+        '200':
+          description: Successful verification
+          content:
+            application/json:
+              schema:
+                type: object
+        '400':
+          description: OTP is required
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+        '500':
+          description: Failed to verify step-up authentication
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+  /ocr/analyze:
+    post:
+      summary: Perform OCR Analysis
+      description: Requires step-up authentication
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+      responses:
+        '200':
+          description: Successful OCR analysis
+          content:
+            application/json:
+              schema:
+                type: object
+        '500':
+          description: OCR analysis failed
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+  /health:
+    get:
+      summary: Health check for the Warp service
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                  service:
+                    type: string
+                  timestamp:
+                    type: string
+                    format: date-time

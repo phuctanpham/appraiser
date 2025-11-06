@@ -118,3 +118,30 @@ __pycache__/
 
 # venv
 venv/
+**/.wrangler
+
+# Dependencies
+**/node_modules/
+**/__pycache__/
+
+# Build artifacts
+**/dist/
+**/build/
+**/.next/
+
+# Databases
+**/*.db
+
+# Logs
+**/*.log
+
+# Wrangler temp files
+**/.wrangler/
+
+# IDE config
+**/.idea/
+**/.vscode/
+
+# OS-generated files
+.DS_Store
+Thumbs.db
