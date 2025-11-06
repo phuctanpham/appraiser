@@ -1,6 +1,6 @@
 name = "admin"
 compatibility_date = "2025-10-17"
-pages_build_output_dir = "./build"
+pages_build_output_dir = "./.next"
 
 [[app_cache]]
 binding = "app_cache"
