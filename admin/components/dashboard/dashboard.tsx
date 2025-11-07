@@ -29,7 +29,7 @@ export default function Dashboard() {
       // Validate token with auth service
       try {
         const response = await fetch(
-          `${process.env.AUTH_API_URL || 'https://auth.vpbank.workers.dev/api'}/auth/validate`,
+          `${process.env.AUTH_API_URL || 'http://localhost:8787'}/api/auth/validate`,
           {
             headers: { 
               'Authorization': `Bearer ${token}` 

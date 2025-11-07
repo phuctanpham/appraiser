@@ -6,7 +6,7 @@ import ImageUpload from "./image-upload"
 import PropertyReview from "./property-review"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000"
+const API_BASE_URL = process.env.API_URL|| "http://localhost:3004"
 
 interface PropertyFormProps {
   onValuationComplete: (data: any) => void

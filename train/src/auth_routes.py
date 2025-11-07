@@ -19,8 +19,8 @@ import os
 
 router = APIRouter(prefix="/api/auth", tags=["authentication"])
 
-AUTH_GUI_URL = os.getenv("AUTH_GUI_URL", "http://localhost:3001")
-AUTH_API_URL = os.getenv("AUTH_API_URL", "http://localhost:8000")
+AUTH_GUI_URL = os.getenv("AUTH_GUI_URL", "http://localhost:8787")
+AUTH_API_URL = os.getenv("AUTH_API_URL", "http://localhost:8787")
 
 # =====================================================
 # REQUEST/RESPONSE SCHEMAS

@@ -58,7 +58,7 @@ auth.post('/register', async (c) => {
     await setVerificationToken(c.env.DB, user.id, verificationToken, expiresAt);
     
     try {
-      const verificationUrl = `${c.env.AUTH_API_URL}/auth/verify-email?token=${verificationToken}`;
+      const verificationUrl = `${c.env.AUTH_API_URL}/api/auth/verify-email?token=${verificationToken}`;
       const emailHtml = generateVerificationEmail(name, verificationUrl);
       await sendEmail(email, 'Verify Your Email', emailHtml, c.env.EMAIL_FROM, c.env.EMAIL_API_KEY);
     } catch (emailError) {
@@ -202,7 +202,7 @@ auth.post('/resend-verification', async (c) => {
     
     await setVerificationToken(c.env.DB, user.id, verificationToken, expiresAt);
     
-    const verificationUrl = `${c.env.AUTH_API_URL}/auth/verify-email?token=${verificationToken}`;
+    const verificationUrl = `${c.env.AUTH_API_URL}/api/auth/verify-email?token=${verificationToken}`;
     const emailHtml = generateVerificationEmail(user.name || 'User', verificationUrl);
     
     await sendEmail(email, 'Verify Your Email', emailHtml, c.env.EMAIL_FROM, c.env.EMAIL_API_KEY);

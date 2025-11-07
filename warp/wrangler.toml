@@ -4,13 +4,17 @@ compatibility_date = "2024-11-04"
 
 [vars]
 ENVIRONMENT = "production"
-# AUTH_API_URL = "http://127.0.0.1:8787"
-# OCR_SRV_URL = "http://127.0.0.1:8789"
+
 AUTH_API_URL = "https://auth.vpbank.workers.dev"
 OCR_SRV_URL = "https://fbjwmzfdhxwnliaao4fvip4qxi0cahya.lambda-url.ap-southeast-2.on.aws"
 
+[dev.vars]
+ENVIRONMENT = "development"
+AUTH_API_URL = "http://localhost:8787"
+OCR_SRV_URL = "http://localhost:8789"
+
 [dev]
-ip = "127.0.0.1"
+ip = "0.0.0.0"
 port = 8788
 local_protocol = "http"
 

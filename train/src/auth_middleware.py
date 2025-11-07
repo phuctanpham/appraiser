@@ -4,7 +4,7 @@ from fastapi import HTTPException, Depends, status
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 
 security = HTTPBearer()
-AUTH_API_URL = os.getenv("AUTH_API_URL", "http://auth.vpbank.workers.dev")
+AUTH_API_URL = os.getenv("AUTH_API_URL", "http://localhost:8787")
 
 async def get_current_user(
     credentials: HTTPAuthorizationCredentials = Depends(security)
