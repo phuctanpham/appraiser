@@ -1,10 +1,10 @@
 {
-  "name": "admin",
+  "name": "property-valuation-ai",
   "version": "1.0.0",
   "private": true,
   "scripts": {
     "build": "next build",
-    "dev": "nohup next dev --hostname 0.0.0.0 -p 3002 > admin.log 2>&1 &",
+    "dev": "next dev --hostname 0.0.0.0 -p 3002",
     "lint": "next lint",
     "start": "next start",
     "preview:wrangler": "npm run build && wrangler pages dev",
