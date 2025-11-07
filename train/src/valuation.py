@@ -16,15 +16,15 @@ def valuation_heuristic(fields: Dict[str, Any]) -> Dict[str, Any]:
     base_per_m2 = 20000000  # VNĐ/m2 default fallback (20M VND/m2)
     
     # Adjust by property type
-    if fields.get("property_type") == "land":
+    if fields.get("category") == "land":
         base_per_m2 *= 1.05
-    elif fields.get("property_type") == "house":
+    elif fields.get("category") == "house":
         base_per_m2 *= 1.02
 
     # If user provided total price, blend with user data
-    if fields.get("price_est_input") and fields.get("area_m2"):
+    if fields.get("price_est_input") and fields.get("size"):
         try:
-            user_per_m2 = fields["price_est_input"] / fields["area_m2"]
+            user_per_m2 = fields["price_est_input"] / fields["size"]
             # Blend: 40% model, 60% user input
             base_per_m2 = (base_per_m2 * 0.4) + (user_per_m2 * 0.6)
         except (TypeError, ZeroDivisionError):
@@ -60,9 +60,9 @@ def valuation_heuristic(fields: Dict[str, Any]) -> Dict[str, Any]:
             pass
 
     # Area effect (small apartments have premium, large have discount)
-    if fields.get("area_m2"):
+    if fields.get("size"):
         try:
-            a = float(fields["area_m2"])
+            a = float(fields["size"])
             if a < 40:
                 adj += 0.05  # Small premium
             elif a > 200:
@@ -71,25 +71,25 @@ def valuation_heuristic(fields: Dict[str, Any]) -> Dict[str, Any]:
             pass
 
     # Location bonus (if city is Hanoi or HCMC)
-    city = (fields.get("city") or "").lower()
-    if "hà nội" in city or "hanoi" in city or "hcm" in city or "ho chi minh" in city or "saigon" in city:
+    region = (fields.get("region") or "").lower()
+    if "hà nội" in region or "hanoi" in region or "hcm" in region or "ho chi minh" in region or "saigon" in region:
         adj += 0.10
 
     # Calculate final valuation
     est_per_m2 = max(0, base_per_m2 * adj)
-    est_total = est_per_m2 * (fields.get("area_m2") or 0)
+    est_total = est_per_m2 * (fields.get("size") or 0)
 
     # Return breakdown for transparency
     breakdown = {
         "base_per_m2": round(base_per_m2),
         "adj_factor": round(adj, 3),
         "components": {
-            "property_type": fields.get("property_type", "unknown"),
+            "category": fields.get("category", "unknown"),
             "condition_adj": condition or "unknown",
             "age_years": (2025 - fields.get("year_built")) if fields.get("year_built") else None,
-            "area_m2": fields.get("area_m2"),
-            "city": fields.get("city"),
-            "location_bonus": 0.10 if "hà nội" in city or "hanoi" in city or "hcm" in city or "ho chi minh" in city or "saigon" in city else 0
+            "size": fields.get("size"),
+            "region": fields.get("region"),
+            "location_bonus": 0.10 if "hà nội" in region or "hanoi" in region or "hcm" in region or "ho chi minh" in region or "saigon" in region else 0
         }
     }
 

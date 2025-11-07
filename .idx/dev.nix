@@ -11,6 +11,21 @@
     pkgs.nodejs_20
     pkgs.nodePackages.npm
     pkgs.docker-compose
+    pkgs.xorg.xvfb
+    pkgs.xorg.xhost
+    pkgs.xorg.xauth
+    pkgs.xorg.libxrandr
+    pkgs.xorg.libxinerama
+    pkgs.xorg.libxi
+    pkgs.xorg.libxcursor
+    pkgs.xorg.libxscrnsaver
+    pkgs.alsa-lib
+    pkgs.cups
+    pkgs.libglvnd
+    pkgs.dbus
+    pkgs.expat
+    pkgs.nss
+    pkgs.at-spi2-atk
   ];
 
   # Sets environment variables in the workspace

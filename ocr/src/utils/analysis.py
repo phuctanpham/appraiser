@@ -23,8 +23,8 @@ Return JSON with ALL fields below. Use null if not found."""
 {
   "property_info": {
     "address": "string or null",
-    "property_type": "house/apartment/land or null",
-    "usable_area_m2": "number or null",
+    "category": "house/apartment/land or null",
+    "size": "number or null",
     "land_area_m2": "number or null",
     "bedrooms": "integer or null",
     "bathrooms": "integer or null",

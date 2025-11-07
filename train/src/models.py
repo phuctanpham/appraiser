@@ -14,34 +14,14 @@ Base = declarative_base()
 # MODELS
 # =====================================================
 
-class User(Base):
-    __tablename__ = "users"
-    
-    id = Column(Integer, primary_key=True, autoincrement=True)
-    email = Column(String, unique=True, index=True, nullable=False)
-    password_hash = Column(String, nullable=False)
-    name = Column(String)
-    phone = Column(String, nullable=True)
-    is_verified = Column(Boolean, default=False)
-    verification_token = Column(String, nullable=True)
-    verification_token_expires = Column(DateTime, nullable=True)
-    reset_token = Column(String, nullable=True)
-    reset_token_expires = Column(DateTime, nullable=True)
-    created_at = Column(DateTime, default=datetime.utcnow)
-    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
-    
-    reports = relationship("PropertyReport", back_populates="user", cascade="all, delete-orphan")
-
-
 class PropertyReport(Base):
     __tablename__ = "property_reports"
     
     id = Column(Integer, primary_key=True)
-    user_id = Column(Integer, ForeignKey("users.id"), index=True)
     address = Column(String, index=True)
-    property_type = Column(String)  # Căn hộ, Nhà phố, etc.
+    category = Column(String)  # Căn hộ, Nhà phố, etc.
     land_area = Column(Float, nullable=True)
-    usable_area = Column(Float)
+    size = Column(Float)
     bedrooms = Column(Integer)
     bathrooms = Column(Integer)
     floors = Column(Integer)
@@ -64,7 +44,6 @@ class PropertyReport(Base):
     created_at = Column(DateTime, default=datetime.utcnow, index=True)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
     
-    user = relationship("User", back_populates="reports")
     images = relationship("PropertyImage", back_populates="report", cascade="all, delete-orphan")
 
 

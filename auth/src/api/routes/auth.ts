@@ -308,16 +308,9 @@ auth.get('/validate', async (c: Context) => {
     const token = authHeader.substring(7);
     const payload = await verifyToken(token, c.env.JWT_SECRET);
     
-    const user = await getUserById(c.env.DB, payload.sub);
-    if (!user) {
-      return c.json({ error: 'User not found' }, 404);
-    }
-    
     return c.json({
       valid: true,
-      userId: user.id,
-      email: user.email,
-      name: user.name
+      userId: payload.userId
     });
   } catch (error) {
     return c.json({ error: 'Invalid token' }, 401);
