@@ -80,7 +80,7 @@ jobs:
     with:
       working-directory: ./auth
 
-deploy-warp:
+  deploy-warp:
     needs: detect-changes
     if: needs.detect-changes.outputs.warp == 'true'
     uses: ./.github/workflows/aws-lambda.yml
