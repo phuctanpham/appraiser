@@ -1,0 +1,17 @@
+name: Setup Node.js
+description: Setup Node.js with npm caching
+
+inputs:
+  working-directory:
+    description: Working directory
+    required: true
+
+runs:
+  using: composite
+  steps:
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20'
+        cache: 'npm'
+        cache-dependency-path: ${{ inputs.working-directory }}/package-lock.json

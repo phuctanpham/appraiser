@@ -1,0 +1,107 @@
+name: Deploy AWS Lambda
+
+on:
+  workflow_call:
+    inputs:
+      function-name:
+        required: true
+        type: string
+      working-directory:
+        required: true
+        type: string
+      download-model:
+        required: false
+        type: boolean
+        default: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+      - uses: ./.github/actions/setup-python
+        with:
+          working-directory: ${{ inputs.working-directory }}
+      
+      - uses: ./.github/actions/build-lambda-package
+        with:
+          working-directory: ${{ inputs.working-directory }}
+      
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
+      
+      - name: Download model from S3
+        if: inputs.download-model
+        working-directory: ${{ inputs.working-directory }}/package
+        run: |
+          aws s3 cp s3://${{ secrets.AWS_BUCKET_NAME }}/model_artifacts/lightgbm_model.txt ./lightgbm_model.txt
+      
+      - name: Create deployment package
+        working-directory: ${{ inputs.working-directory }}/package
+        run: |
+          find . -type d -name "__pycache__" -exec rm -rf {} + 2>/dev/null || true
+          find . -type d -name "*.dist-info" -exec rm -rf {} + 2>/dev/null || true
+          find . -type d -name "tests" -exec rm -rf {} + 2>/dev/null || true
+          find . -type f -name "*.pyc" -delete
+          find . -type f -name "*.pyo" -delete
+          zip -r9 ../deployment-package.zip . -x "*.git*" "*.pyc" "*__pycache__*"
+      
+      - name: Check package size
+        working-directory: ${{ inputs.working-directory }}
+        run: |
+          SIZE=$(du -h deployment-package.zip | cut -f1)
+          echo "📦 Package size: $SIZE"
+          SIZE_BYTES=$(stat -c%s deployment-package.zip)
+          if [ $SIZE_BYTES -gt 52428800 ]; then
+            echo "⚠️  Warning: Package exceeds 50MB limit"
+          fi
+      
+      - name: Deploy to AWS Lambda
+        working-directory: ${{ inputs.working-directory }}
+        run: |
+          aws lambda update-function-code \
+            --function-name ${{ inputs.function-name }} \
+            --zip-file fileb://deployment-package.zip
+      
+      - name: Wait for update
+        run: |
+          aws lambda wait function-updated --function-name ${{ inputs.function-name }}
+      
+      - name: Update configuration
+        run: |
+          aws lambda update-function-configuration \
+            --function-name ${{ inputs.function-name }} \
+            --timeout 900 \
+            --memory-size 3000 \
+            --environment "Variables={
+              MODEL_PATH=/var/task/lightgbm_model.txt,
+              DATABASE_URL=${{ secrets.DATABASE_URL }},
+              BUCKET_ACCOUNT_ID=${{ secrets.AWS_ACCOUNT_ID }},
+              BUCKET_ACCESS_KEY_ID=${{ secrets.AWS_ACCESS_KEY_ID }},
+              BUCKET_SECRET_ACCESS_KEY=${{ secrets.AWS_SECRET_ACCESS_KEY }},
+              BUCKET_NAME=${{ secrets.AWS_BUCKET_NAME }},
+              BUCKET_REGION=${{ secrets.AWS_REGION }},
+              OPENAI_API_KEY=${{ secrets.OPENAI_API_KEY }},
+              WARP_KEY=${{ secrets.WARP_KEY }},
+              SMTP_HOST=${{ secrets.SMTP_HOST }},
+              SMTP_PORT=${{ secrets.SMTP_PORT }},
+              SMTP_USERNAME=${{ secrets.SMTP_USERNAME }},
+              SMTP_PASSWORD=${{ secrets.SMTP_PASSWORD }},
+              SMTP_FROM_EMAIL=${{ secrets.SMTP_FROM_EMAIL }},
+              SMTP_FROM_NAME=${{ secrets.SMTP_FROM_NAME }},
+              ADMIN_URL=${{ secrets.ADMIN_URL }},
+              WARP_URL=${{ secrets.WARP_URL }}
+            }"
+      
+      - name: Get Function URL
+        run: |
+          FUNCTION_URL=$(aws lambda get-function-url-config \
+            --function-name ${{ inputs.function-name }} \
+            --query 'FunctionUrl' \
+            --output text 2>/dev/null || echo "No Function URL configured")
+          echo "🔗 Function URL: $FUNCTION_URL"

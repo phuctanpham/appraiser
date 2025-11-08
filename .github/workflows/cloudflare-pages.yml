@@ -1,0 +1,53 @@
+name: Deploy Cloudflare Pages
+
+on:
+  workflow_call:
+    inputs:
+      project-name:
+        required: true
+        type: string
+      working-directory:
+        required: true
+        type: string
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+      - uses: ./.github/actions/setup-node
+        with:
+          working-directory: ${{ inputs.working-directory }}
+      
+      - name: Install dependencies
+        working-directory: ${{ inputs.working-directory }}
+        run: npm ci
+      
+      - name: Build
+        working-directory: ${{ inputs.working-directory }}
+        run: npm run build
+      
+      - name: Detect build output
+        id: build-dir
+        working-directory: ${{ inputs.working-directory }}
+        run: |
+          if [ -d "dist" ]; then
+            echo "dir=dist" >> $GITHUB_OUTPUT
+          elif [ -d "build" ]; then
+            echo "dir=build" >> $GITHUB_OUTPUT
+          elif [ -d "out" ]; then
+            echo "dir=out" >> $GITHUB_OUTPUT
+          else
+            echo "❌ No build output found"
+            ls -la
+            exit 1
+          fi
+      
+      - name: Deploy to Cloudflare Pages
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          command: pages deploy ./${{ steps.build-dir.outputs.dir }} --project-name=${{ inputs.project-name }}
+          workingDirectory: ${{ inputs.working-directory }}

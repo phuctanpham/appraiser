@@ -1,0 +1,23 @@
+name: Build Lambda Package
+description: Build AWS Lambda deployment package
+
+inputs:
+  working-directory:
+    description: Working directory
+    required: true
+
+runs:
+  using: composite
+  steps:
+    - name: Install dependencies
+      shell: bash
+      working-directory: ${{ inputs.working-directory }}
+      run: |
+        rm -rf ./package
+        mkdir -p ./package
+        python -m pip install --upgrade pip
+        pip install --platform manylinux2014_x86_64 --only-binary=:all: -r requirements.txt -t ./package
+        cp -r src ./package/
+        if [ -f "lambda_handler.py" ]; then
+          cp lambda_handler.py ./package/
+        fi
