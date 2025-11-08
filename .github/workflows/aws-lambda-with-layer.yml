@@ -33,15 +33,21 @@ jobs:
           if [ -f "requirements-layer.txt" ]; then
             echo "📦 Installing layer dependencies..."
             pip install --platform manylinux2014_x86_64 --only-binary=:all: \
-              -r requirements-layer.txt -t ./layer/python
+              -r requirements-layer.txt -t ./layer/python || exit 1
           fi
           
           echo "📦 Installing app dependencies..."
           pip install --platform manylinux2014_x86_64 --only-binary=:all: \
-            -r requirements.txt -t ./package
+            -r requirements.txt -t ./package || exit 1
           
-          cp -r src ./package/
-          [ -f "lambda_handler.py" ] && cp lambda_handler.py ./package/
+          if [ -d "src" ]; then
+            cp -r src ./package/
+          else
+            echo "❌ src directory not found"
+            exit 1
+          fi
+          
+          [ -f "lambda_handler.py" ] && cp lambda_handler.py ./package/ || true
       
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
