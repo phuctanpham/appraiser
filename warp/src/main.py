@@ -52,13 +52,13 @@ app.include_router(auth_router)
 # AWS S3
 s3_client = boto3.client(
     's3',
-    aws_access_key_id=os.getenv("AWS_ACCESS_KEY_ID"),
-    aws_secret_access_key=os.getenv("AWS_SECRET_ACCESS_KEY"),
-    region_name=os.getenv("AWS_REGION", "ap-southeast-1")
+    aws_access_key_id=os.getenv("BUCKET_ACCOUNT_ID"),
+    aws_secret_access_key=os.getenv("BUCKET_SECRET_ACCESS_KEY"),
+    region_name=os.getenv("BUCKET_REGION", "ap-southeast-1")
 )
 
-S3_BUCKET = os.getenv("S3_BUCKET", "ai-asset-valuation")
-AWS_REGION = os.getenv("AWS_REGION", "ap-southeast-1")
+S3_BUCKET = os.getenv("BUCKET_NAME", "ai-asset-valuation")
+AWS_REGION = os.getenv("BUCKET_REGION", "ap-southeast-1")
 logger = logging.getLogger(__name__)
 
 

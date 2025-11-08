@@ -11,6 +11,7 @@
     pkgs.nodejs_20
     pkgs.nodePackages.npm
     pkgs.docker-compose
+    pkgs.mesa
   ];
 
   # Sets environment variables in the workspace

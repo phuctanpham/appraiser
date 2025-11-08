@@ -10,7 +10,7 @@ import os
 import hashlib
 
 # Security Configuration
-SECRET_KEY = os.getenv("SECRET_KEY", "your-secret-key-change-this-in-production")
+WARP_KEY = os.getenv("WARP_KEY", "your-secret-key-change-this-in-production")
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 60 * 24 * 7  # 7 days
 VERIFICATION_TOKEN_EXPIRE_HOURS = 24
@@ -64,7 +64,7 @@ def create_access_token(data: dict, expires_delta: Optional[timedelta] = None) -
         expire = datetime.utcnow() + timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
     
     to_encode.update({"exp": expire})
-    encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
+    encoded_jwt = jwt.encode(to_encode, WARP_KEY, algorithm=ALGORITHM)
     return encoded_jwt
 
 def create_verification_token() -> str:
@@ -74,7 +74,7 @@ def create_verification_token() -> str:
 def verify_token(token: str) -> Dict[str, Any]:
     """Verify and decode JWT token"""
     try:
-        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        payload = jwt.decode(token, WARP_KEY, algorithms=[ALGORITHM])
         return payload
     except JWTError:
         raise HTTPException(

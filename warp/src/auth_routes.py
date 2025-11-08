@@ -19,7 +19,7 @@ import os
 
 router = APIRouter(prefix="/api/auth", tags=["authentication"])
 
-FRONTEND_URL = os.getenv("FRONTEND_URL", "http://localhost:3000")
+FRONTEND_URL = os.getenv("FRONTEND_LOCAL", "http://localhost:3000")
 BACKEND_URL = os.getenv("BACKEND_URL", "http://localhost:8000")
 
 # =====================================================
@@ -117,13 +117,13 @@ async def verify_email(token: str = Query(...), db: Session = Depends(get_db)):
     
     if not user:
         return RedirectResponse(
-            url=f"{FRONTEND_URL}?error=invalid_token&message=Link xác thực không hợp lệ"
+            url=f'{FRONTEND_URL}?error=invalid_token&message=Link xác thực không hợp lệ'
         )
     
     # Check if token expired
     if user.verification_token_expires < datetime.utcnow():
         return RedirectResponse(
-            url=f"{FRONTEND_URL}?error=expired_token&message=Link xác thực đã hết hạn"
+            url=f'{FRONTEND_URL}?error=expired_token&message=Link xác thực đã hết hạn'
         )
     
     # Verify user
@@ -133,7 +133,7 @@ async def verify_email(token: str = Query(...), db: Session = Depends(get_db)):
     db.commit()
     
     return RedirectResponse(
-        url=f"{FRONTEND_URL}?verified=true&message=Xác thực thành công! Bạn có thể đăng nhập ngay."
+        url=f'{FRONTEND_URL}?verified=true&message=Xác thực thành công! Bạn có thể đăng nhập ngay.'
     )
 
 
