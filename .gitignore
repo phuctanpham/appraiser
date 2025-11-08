@@ -26,7 +26,7 @@
 **/.vscode/
 **/*.sublime-project
 **/*.sublime-workspace
-
+**/.idx
 # Build output directories
 **/dist/
 **/build/
