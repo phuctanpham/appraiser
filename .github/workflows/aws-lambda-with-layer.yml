@@ -1,0 +1,139 @@
+name: Deploy AWS Lambda with Layer
+
+on:
+  workflow_call:
+    inputs:
+      function-name:
+        required: true
+        type: string
+      working-directory:
+        required: true
+        type: string
+      download-model:
+        required: false
+        type: boolean
+        default: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      
+      - name: Build packages
+        working-directory: ${{ inputs.working-directory }}
+        run: |
+          rm -rf ./package ./layer
+          mkdir -p ./package ./layer/python
+          
+          if [ -f "requirements-layer.txt" ]; then
+            echo "📦 Installing layer dependencies..."
+            pip install --platform manylinux2014_x86_64 --only-binary=:all: \
+              -r requirements-layer.txt -t ./layer/python
+          fi
+          
+          echo "📦 Installing app dependencies..."
+          pip install --platform manylinux2014_x86_64 --only-binary=:all: \
+            -r requirements.txt -t ./package
+          
+          cp -r src ./package/
+          [ -f "lambda_handler.py" ] && cp lambda_handler.py ./package/
+      
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
+      
+      - name: Download model
+        if: inputs.download-model
+        working-directory: ${{ inputs.working-directory }}/package
+        run: |
+          aws s3 cp s3://${{ secrets.AWS_BUCKET_NAME }}/model_artifacts/lightgbm_model.txt ./
+      
+      - name: Create and publish layer
+        working-directory: ${{ inputs.working-directory }}
+        run: |
+          if [ -d "./layer/python" ] && [ "$(ls -A ./layer/python)" ]; then
+            cd layer
+            zip -r9 ../layer.zip . -x "*.pyc" "*__pycache__*" "*.dist-info/*"
+            cd ..
+            
+            LAYER_NAME="${{ inputs.function-name }}-deps"
+            echo "🚀 Publishing layer: $LAYER_NAME"
+            
+            LAYER_VERSION=$(aws lambda publish-layer-version \
+              --layer-name "$LAYER_NAME" \
+              --zip-file fileb://layer.zip \
+              --compatible-runtimes python3.11 \
+              --query 'Version' --output text)
+            
+            echo "LAYER_ARN=arn:aws:lambda:${{ secrets.AWS_REGION }}:${{ secrets.AWS_ACCOUNT_ID }}:layer:$LAYER_NAME:$LAYER_VERSION" >> $GITHUB_ENV
+            echo "✅ Layer published: version $LAYER_VERSION"
+          else
+            echo "⚠️ No layer dependencies found"
+            echo "LAYER_ARN=" >> $GITHUB_ENV
+          fi
+      
+      - name: Create deployment package
+        working-directory: ${{ inputs.working-directory }}/package
+        run: |
+          find . -type d -name "__pycache__" -exec rm -rf {} + 2>/dev/null || true
+          find . -type d -name "*.dist-info" -exec rm -rf {} + 2>/dev/null || true
+          find . -type d -name "tests" -exec rm -rf {} + 2>/dev/null || true
+          find . -type f -name "*.pyc" -delete
+          find . -type f -name "*.pyo" -delete
+          zip -r9 ../deployment.zip . -x "*.pyc" "*__pycache__*"
+      
+      - name: Check size
+        working-directory: ${{ inputs.working-directory }}
+        run: |
+          SIZE_BYTES=$(stat -c%s deployment.zip)
+          SIZE_MB=$((SIZE_BYTES / 1024 / 1024))
+          echo "📦 Package: ${SIZE_MB}MB"
+          
+          if [ $SIZE_BYTES -gt 52428800 ]; then
+            echo "❌ Package too large: ${SIZE_MB}MB (limit: 50MB)"
+            exit 1
+          fi
+          echo "✅ Size OK"
+      
+      - name: Update function code
+        working-directory: ${{ inputs.working-directory }}
+        run: |
+          FUNC="${{ secrets[format('AWS_LAMBDA_{0}_FUNCTION_NAME', inputs.function-name)] }}"
+          echo "🚀 Updating function: $FUNC"
+          
+          aws lambda update-function-code \
+            --function-name "$FUNC" \
+            --zip-file fileb://deployment.zip
+          
+          aws lambda wait function-updated --function-name "$FUNC"
+          echo "✅ Code updated"
+      
+      - name: Update function config
+        run: |
+          FUNC="${{ secrets[format('AWS_LAMBDA_{0}_FUNCTION_NAME', inputs.function-name)] }}"
+          
+          if [ -n "$LAYER_ARN" ]; then
+            echo "🔧 Updating config with layer: $LAYER_ARN"
+            aws lambda update-function-configuration \
+              --function-name "$FUNC" \
+              --layers "$LAYER_ARN" \
+              --timeout 900 \
+              --memory-size 3008 \
+              --environment "Variables={MODEL_PATH=/var/task/lightgbm_model.txt,DATABASE_URL=${{ secrets.DATABASE_URL }},BUCKET_ACCOUNT_ID=${{ secrets.AWS_ACCOUNT_ID }},BUCKET_ACCESS_KEY_ID=${{ secrets.AWS_ACCESS_KEY_ID }},BUCKET_SECRET_ACCESS_KEY=${{ secrets.AWS_SECRET_ACCESS_KEY }},BUCKET_NAME=${{ secrets.AWS_BUCKET_NAME }},BUCKET_REGION=${{ secrets.AWS_REGION }},OPENAI_API_KEY=${{ secrets.OPENAI_API_KEY }},WARP_KEY=${{ secrets.WARP_KEY }},SMTP_HOST=${{ secrets.SMTP_HOST }},SMTP_PORT=${{ secrets.SMTP_PORT }},SMTP_USERNAME=${{ secrets.SMTP_USERNAME }},SMTP_PASSWORD=${{ secrets.SMTP_PASSWORD }},SMTP_FROM_EMAIL=${{ secrets.SMTP_FROM_EMAIL }},SMTP_FROM_NAME=${{ secrets.SMTP_FROM_NAME }},ADMIN_URL=${{ secrets.ADMIN_URL }},WARP_URL=${{ secrets.WARP_URL }}}"
+          else
+            echo "🔧 Updating config without layer"
+            aws lambda update-function-configuration \
+              --function-name "$FUNC" \
+              --timeout 900 \
+              --memory-size 3008 \
+              --environment "Variables={MODEL_PATH=/var/task/lightgbm_model.txt,DATABASE_URL=${{ secrets.DATABASE_URL }},BUCKET_ACCOUNT_ID=${{ secrets.AWS_ACCOUNT_ID }},BUCKET_ACCESS_KEY_ID=${{ secrets.AWS_ACCESS_KEY_ID }},BUCKET_SECRET_ACCESS_KEY=${{ secrets.AWS_SECRET_ACCESS_KEY }},BUCKET_NAME=${{ secrets.AWS_BUCKET_NAME }},BUCKET_REGION=${{ secrets.AWS_REGION }},OPENAI_API_KEY=${{ secrets.OPENAI_API_KEY }},WARP_KEY=${{ secrets.WARP_KEY }},SMTP_HOST=${{ secrets.SMTP_HOST }},SMTP_PORT=${{ secrets.SMTP_PORT }},SMTP_USERNAME=${{ secrets.SMTP_USERNAME }},SMTP_PASSWORD=${{ secrets.SMTP_PASSWORD }},SMTP_FROM_EMAIL=${{ secrets.SMTP_FROM_EMAIL }},SMTP_FROM_NAME=${{ secrets.SMTP_FROM_NAME }},ADMIN_URL=${{ secrets.ADMIN_URL }},WARP_URL=${{ secrets.WARP_URL }}}"
+          fi
+          echo "✅ Config updated"
