@@ -80,7 +80,7 @@ jobs:
     with:
       working-directory: ./auth
 
-  deploy-warp:
+deploy-warp:
     needs: detect-changes
     if: needs.detect-changes.outputs.warp == 'true'
     uses: ./.github/workflows/aws-lambda.yml
@@ -88,6 +88,7 @@ jobs:
     with:
       function-name: warp
       working-directory: ./warp
+      use-layer: true
 
   deploy-cron:
     needs: detect-changes
@@ -97,6 +98,7 @@ jobs:
     with:
       function-name: cron
       working-directory: ./cron
+      use-layer: false
 
   deploy-train:
     needs: detect-changes
@@ -106,6 +108,7 @@ jobs:
     with:
       function-name: train
       working-directory: ./train
+      use-layer: false
 
   deploy-ocr:
     needs: detect-changes
@@ -115,6 +118,7 @@ jobs:
     with:
       function-name: ocr
       working-directory: ./ocr
+      use-layer: false
 
   deploy-predict:
     needs: detect-changes
@@ -125,3 +129,4 @@ jobs:
       function-name: predict
       working-directory: ./predict
       download-model: true
+      use-layer: true

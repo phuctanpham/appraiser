@@ -13,6 +13,10 @@ on:
         required: false
         type: boolean
         default: false
+      use-layer:
+        required: false
+        type: boolean
+        default: false
 
 jobs:
   deploy:
@@ -24,26 +28,30 @@ jobs:
         with:
           python-version: '3.11'
       
-      - name: Build package
+      - name: Build with Layer
+        if: inputs.use-layer
         working-directory: ${{ inputs.working-directory }}
         run: |
           rm -rf ./package ./layer
           mkdir -p ./package ./layer/python
           
-          # Separate heavy deps to layer
-          echo "boto3==1.29.7" > layer_requirements.txt
-          echo "opencv-python-headless==4.8.1.78" >> layer_requirements.txt
-          echo "numpy==1.26.2" >> layer_requirements.txt
-          
-          # Install layer deps
           pip install --platform manylinux2014_x86_64 --only-binary=:all: \
-            -r layer_requirements.txt -t ./layer/python
+            -r requirements-layer.txt -t ./layer/python
           
-          # Install app deps (exclude layer deps)
-          grep -vE "^(boto3|opencv-python|numpy)" requirements.txt > app_requirements.txt
           pip install --platform manylinux2014_x86_64 --only-binary=:all: \
-            -r app_requirements.txt -t ./package
+            -r requirements.txt -t ./package
           
+          cp -r src ./package/
+          [ -f "lambda_handler.py" ] && cp lambda_handler.py ./package/
+      
+      - name: Build without Layer
+        if: ${{ !inputs.use-layer }}
+        working-directory: ${{ inputs.working-directory }}
+        run: |
+          rm -rf ./package
+          mkdir -p ./package
+          pip install --platform manylinux2014_x86_64 --only-binary=:all: \
+            -r requirements.txt -t ./package
           cp -r src ./package/
           [ -f "lambda_handler.py" ] && cp lambda_handler.py ./package/
       
@@ -59,16 +67,14 @@ jobs:
         working-directory: ${{ inputs.working-directory }}/package
         run: aws s3 cp s3://${{ secrets.AWS_BUCKET_NAME }}/model_artifacts/lightgbm_model.txt ./
       
-      - name: Create layer package
+      - name: Publish Layer
+        if: inputs.use-layer
         working-directory: ${{ inputs.working-directory }}
         run: |
           cd layer
-          zip -r9 ../layer.zip . -x "*.pyc" "*__pycache__*" "*.dist-info/*"
-      
-      - name: Publish layer
-        working-directory: ${{ inputs.working-directory }}
-        run: |
-          LAYER_NAME="warp-dependencies-layer"
+          zip -r9 ../layer.zip . -x "*.pyc" "*__pycache__*"
+          cd ..
+          LAYER_NAME="${{ inputs.function-name }}-deps"
           LAYER_VERSION=$(aws lambda publish-layer-version \
             --layer-name $LAYER_NAME \
             --zip-file fileb://layer.zip \
@@ -88,38 +94,35 @@ jobs:
         working-directory: ${{ inputs.working-directory }}
         run: |
           SIZE=$(stat -c%s deployment.zip)
-          echo "📦 Package: $(numfmt --to=iec-i --suffix=B $SIZE)"
-          [ $SIZE -gt 52428800 ] && echo "❌ Too large" && exit 1 || echo "✅ OK"
+          echo "📦 Size: $(numfmt --to=iec-i --suffix=B $SIZE)"
+          [ $SIZE -gt 52428800 ] && echo "❌ >50MB" && exit 1 || echo "✅ OK"
       
       - name: Update function
         working-directory: ${{ inputs.working-directory }}
         run: |
-          FUNC_NAME="${{ secrets[format('AWS_LAMBDA_{0}_FUNCTION_NAME', inputs.function-name)] }}"
+          FUNC="${{ secrets[format('AWS_LAMBDA_{0}_FUNCTION_NAME', inputs.function-name)] }}"
           aws lambda update-function-code \
-            --function-name "$FUNC_NAME" \
+            --function-name "$FUNC" \
             --zip-file fileb://deployment.zip
-          aws lambda wait function-updated --function-name "$FUNC_NAME"
+          aws lambda wait function-updated --function-name "$FUNC"
+      
+      - name: Update config with Layer
+        if: inputs.use-layer
+        run: |
+          FUNC="${{ secrets[format('AWS_LAMBDA_{0}_FUNCTION_NAME', inputs.function-name)] }}"
           aws lambda update-function-configuration \
-            --function-name "$FUNC_NAME" \
+            --function-name "$FUNC" \
             --layers "$LAYER_ARN" \
             --timeout 900 \
             --memory-size 3008 \
-            --environment "Variables={
-              MODEL_PATH=/var/task/lightgbm_model.txt,
-              DATABASE_URL=${{ secrets.DATABASE_URL }},
-              BUCKET_ACCOUNT_ID=${{ secrets.AWS_ACCOUNT_ID }},
-              BUCKET_ACCESS_KEY_ID=${{ secrets.AWS_ACCESS_KEY_ID }},
-              BUCKET_SECRET_ACCESS_KEY=${{ secrets.AWS_SECRET_ACCESS_KEY }},
-              BUCKET_NAME=${{ secrets.AWS_BUCKET_NAME }},
-              BUCKET_REGION=${{ secrets.AWS_REGION }},
-              OPENAI_API_KEY=${{ secrets.OPENAI_API_KEY }},
-              WARP_KEY=${{ secrets.WARP_KEY }},
-              SMTP_HOST=${{ secrets.SMTP_HOST }},
-              SMTP_PORT=${{ secrets.SMTP_PORT }},
-              SMTP_USERNAME=${{ secrets.SMTP_USERNAME }},
-              SMTP_PASSWORD=${{ secrets.SMTP_PASSWORD }},
-              SMTP_FROM_EMAIL=${{ secrets.SMTP_FROM_EMAIL }},
-              SMTP_FROM_NAME=${{ secrets.SMTP_FROM_NAME }},
-              ADMIN_URL=${{ secrets.ADMIN_URL }},
-              WARP_URL=${{ secrets.WARP_URL }}
-            }"
+            --environment "Variables={MODEL_PATH=/var/task/lightgbm_model.txt,DATABASE_URL=${{ secrets.DATABASE_URL }},BUCKET_ACCOUNT_ID=${{ secrets.AWS_ACCOUNT_ID }},BUCKET_ACCESS_KEY_ID=${{ secrets.AWS_ACCESS_KEY_ID }},BUCKET_SECRET_ACCESS_KEY=${{ secrets.AWS_SECRET_ACCESS_KEY }},BUCKET_NAME=${{ secrets.AWS_BUCKET_NAME }},BUCKET_REGION=${{ secrets.AWS_REGION }},OPENAI_API_KEY=${{ secrets.OPENAI_API_KEY }},WARP_KEY=${{ secrets.WARP_KEY }},SMTP_HOST=${{ secrets.SMTP_HOST }},SMTP_PORT=${{ secrets.SMTP_PORT }},SMTP_USERNAME=${{ secrets.SMTP_USERNAME }},SMTP_PASSWORD=${{ secrets.SMTP_PASSWORD }},SMTP_FROM_EMAIL=${{ secrets.SMTP_FROM_EMAIL }},SMTP_FROM_NAME=${{ secrets.SMTP_FROM_NAME }},ADMIN_URL=${{ secrets.ADMIN_URL }},WARP_URL=${{ secrets.WARP_URL }}}"
+      
+      - name: Update config without Layer
+        if: ${{ !inputs.use-layer }}
+        run: |
+          FUNC="${{ secrets[format('AWS_LAMBDA_{0}_FUNCTION_NAME', inputs.function-name)] }}"
+          aws lambda update-function-configuration \
+            --function-name "$FUNC" \
+            --timeout 900 \
+            --memory-size 3008 \
+            --environment "Variables={MODEL_PATH=/var/task/lightgbm_model.txt,DATABASE_URL=${{ secrets.DATABASE_URL }},BUCKET_ACCOUNT_ID=${{ secrets.AWS_ACCOUNT_ID }},BUCKET_ACCESS_KEY_ID=${{ secrets.AWS_ACCESS_KEY_ID }},BUCKET_SECRET_ACCESS_KEY=${{ secrets.AWS_SECRET_ACCESS_KEY }},BUCKET_NAME=${{ secrets.AWS_BUCKET_NAME }},BUCKET_REGION=${{ secrets.AWS_REGION }},OPENAI_API_KEY=${{ secrets.OPENAI_API_KEY }},WARP_KEY=${{ secrets.WARP_KEY }},SMTP_HOST=${{ secrets.SMTP_HOST }},SMTP_PORT=${{ secrets.SMTP_PORT }},SMTP_USERNAME=${{ secrets.SMTP_USERNAME }},SMTP_PASSWORD=${{ secrets.SMTP_PASSWORD }},SMTP_FROM_EMAIL=${{ secrets.SMTP_FROM_EMAIL }},SMTP_FROM_NAME=${{ secrets.SMTP_FROM_NAME }},ADMIN_URL=${{ secrets.ADMIN_URL }},WARP_URL=${{ secrets.WARP_URL }}}"
