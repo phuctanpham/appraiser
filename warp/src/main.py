@@ -11,11 +11,11 @@ import boto3
 from datetime import datetime
 from io import BytesIO
 
-from backend.models import PropertyReport, PropertyImage, get_db
-from backend.schemas import PropertyReportCreate
-from backend.auth import get_current_user
-from backend.auth_routes import router as auth_router
-from backend.image_analysis_service import (
+from models import PropertyReport, PropertyImage, get_db
+from schemas import PropertyReportCreate
+from auth import get_current_user
+from auth_routes import router as auth_router
+from image_analysis_service import (
     analyze_images_to_property_form,
     convert_bytes_to_base64_for_analysis,
     compress_image_if_needed,

@@ -1,0 +1,22 @@
+
+name = "admin"
+compatibility_date = "2025-11-06"
+pages_build_output_dir = "out"
+
+# SPA routing - redirect all routes to index.html
+[[redirects]]
+from = "/*"
+to = "/index.html"
+status = 200
+
+[vars]
+ENVIRONMENT = "production"
+NEXT_PUBLIC_API_URL="https://mkvzeqdqml7ktylf7dcpejbiu40mfudf.lambda-url.ap-southeast-2.on.aws"
+NEXT_PUBLIC_LOCALHOST="http://localhost:8000"
+NEXT_PUBLIC_GOOGLE_CLIENT_ID=
+
+
+[[app_cache]]
+binding = "app_cache"
+id = "e12207eca0bb41d6b801beef00fddfe5" # You need to replace this with your actual KV namespace ID
+preview_id = "e12207eca0bb41d6b801beef00fddfe5" # You need to replace this with your actual preview KV namespace ID
