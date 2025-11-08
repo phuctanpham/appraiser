@@ -24,8 +24,12 @@ app = FastAPI(
 )
 
 # Đường dẫn tới các file model artifacts
-MODEL_PATH = "model_artifacts/lightgbm_model.txt"
-
+MODEL_PATH = os.getenv("MODEL_PATH")
+if not MODEL_PATH:
+    if os.path.exists("./lightgbm_model.txt"):
+        MODEL_PATH = "./lightgbm_model.txt"
+    else:
+        MODEL_PATH = "../model_artifacts/lightgbm_model.txt"
 # Load model và SHAP explainer khi ứng dụng khởi động
 try:
     model = lgb.Booster(model_file=MODEL_PATH)

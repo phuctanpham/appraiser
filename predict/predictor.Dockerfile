@@ -16,14 +16,14 @@ COPY requirements.txt .
 
 RUN pip install --no-cache-dir -r requirements.txt
 
-COPY ./model_artifacts/test_predict.py .
+COPY ./src/model_artifacts/test_predict.py .
 
 # File predict.py và model_artifacts sẽ được mount vào qua docker-compose
 # nên không cần lệnh COPY ở đây.
 
-COPY ./model_artifacts/preprocessor.pkl .
-COPY ./model_artifacts/metadata.json .
-COPY ./model_artifacts/lightgbm_model.txt .
+COPY ./src/model_artifacts/preprocessor.pkl .
+COPY ./src/model_artifacts/metadata.json .
+COPY ./src/model_artifacts/lightgbm_model.txt .
 
 
 # CMD mặc định là chạy script dự đoán

@@ -19,7 +19,7 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 # 2. Copy script training vào thư mục làm việc
 # Docker sẽ tìm file tại: ./model_artifacts/train_model.py
-COPY ./model_artifacts/train_model.py .
+COPY ./src/model_artifacts/train_model.py .
 
 # 3. Copy dữ liệu training vào thư mục làm việc
 # Docker sẽ tìm file tại: ./chotot_bds_video_data.csv

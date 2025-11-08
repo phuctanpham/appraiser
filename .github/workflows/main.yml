@@ -220,7 +220,7 @@ jobs:
         run: npm run build
       
       - name: Check build output
-        working-directory: ./admin
+        working-directory: ./out
         run: |
           echo "Checking for out directories..."
           if [ -d "out" ]; then
@@ -606,6 +606,13 @@ jobs:
           cache: 'pip'
           cache-dependency-path: predict/requirements.txt
       
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
+      
       - name: Install dependencies
         working-directory: ./predict
         run: |
@@ -613,20 +620,20 @@ jobs:
           mkdir -p ./package
           python -m pip install --upgrade pip
           pip install -r requirements.txt -t ./package
-          cp -r src ./package/
-
+          cp src/main.py ./package/
+          cp src/schemas.py ./package/
+          cp src/__init__.py ./package/
+          cp src/lambda_handler.py ./package/
+      
+      - name: Download model from S3
+        working-directory: ./predict/package
+        run: |
+          aws s3 cp s3://${{ secrets.AWS_BUCKET_NAME }}/model_artifacts/lightgbm_model.txt ./lightgbm_model.txt
       
       - name: Create deployment package
         working-directory: ./predict/package
         run: |
           zip -r ../deployment-package.zip .
-      
-      - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v4
-        with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: ${{ secrets.AWS_REGION }}
       
       - name: Deploy to AWS Lambda
         working-directory: ./predict
@@ -645,6 +652,7 @@ jobs:
           aws lambda update-function-configuration \
             --function-name ${{ secrets.AWS_LAMBDA_PREDICT_FUNCTION_NAME }} \
             --environment "Variables={
+              MODEL_PATH=/var/task/lightgbm_model.txt,
               BUCKET_ACCOUNT_ID=${{ secrets.AWS_ACCOUNT_ID }},
               BUCKET_ACCESS_KEY_ID=${{ secrets.AWS_ACCESS_KEY_ID }},
               BUCKET_SECRET_ACCESS_KEY=${{ secrets.AWS_SECRET_ACCESS_KEY }},
