@@ -20,11 +20,11 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       
-      - uses: ./.github/workflows/actions/setup-python.yml
+      - uses: ./.github/actions/setup-python
         with:
           working-directory: ${{ inputs.working-directory }}
       
-      - uses: ./.github/workflows/actions/build-lambda-package.yml
+      - uses: ./.github/actions/build-lambda-package
         with:
           working-directory: ${{ inputs.working-directory }}
       
