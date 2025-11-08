@@ -321,8 +321,7 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt -t ./package
           cp -r src ./package/
-          cp -r alembic ./package/ 2>/dev/null || true
-          cp alembic.ini ./package/ 2>/dev/null || true
+
       
       - name: Create deployment package
         working-directory: ./warp/package
@@ -373,7 +372,6 @@ jobs:
             --output text 2>/dev/null || echo "No Function URL configured")
           echo "WARP Lambda Function URL: $FUNCTION_URL"
 
-
   deploy-cron:
     needs: detect-changes
     if: needs.detect-changes.outputs.cron == 'true'
@@ -397,8 +395,6 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt -t ./package
           cp -r src ./package/
-          cp -r alembic ./package/ 2>/dev/null || true
-          cp alembic.ini ./package/ 2>/dev/null || true
       
       - name: Create deployment package
         working-directory: ./cron/package
@@ -429,11 +425,16 @@ jobs:
           aws lambda update-function-configuration \
             --function-name ${{ secrets.AWS_LAMBDA_CRON_FUNCTION_NAME }} \
             --environment "Variables={
-              R2_ACCOUNT_ID=${{ secrets.R2_ACCOUNT_ID }},
-              R2_ACCESS_KEY_ID=${{ secrets.R2_ACCESS_KEY_ID }},
-              R2_SECRET_ACCESS_KEY=${{ secrets.R2_SECRET_ACCESS_KEY }},
-              R2_BUCKET_NAME=${{ secrets.R2_BUCKET_NAME }},
-              OPENAI_API_KEY=${{ secrets.OPENAI_API_KEY }}
+              BUCKET_ACCOUNT_ID=${{ secrets.AWS_ACCOUNT_ID }},
+              BUCKET_ACCESS_KEY_ID=${{ secrets.AWS_ACCESS_KEY_ID }},
+              BUCKET_SECRET_ACCESS_KEY=${{ secrets.AWS_SECRET_ACCESS_KEY }},
+              BUCKET_NAME=${{ secrets.AWS_BUCKET_NAME }},
+              BUCKET_REGION=${{ secrets.AWS_REGION }},
+              OPENAI_API_KEY=${{ secrets.OPENAI_API_KEY }},
+              WARP_KEY=${{ secrets.WARP_KEY }},
+              SMTP_USERNAME=${{ secrets.SMTP_USERNAME }},
+              SMTP_PASSWORD=${{ secrets.SMTP_PASSWORD }},
+              SMTP_FROM_EMAIL=${{ secrets.SMTP_FROM_EMAIL }}
             }"
       
       - name: Get Function URL
@@ -442,7 +443,7 @@ jobs:
             --function-name ${{ secrets.AWS_LAMBDA_CRON_FUNCTION_NAME }} \
             --query 'FunctionUrl' \
             --output text 2>/dev/null || echo "No Function URL configured")
-          echo "CRONCRON Lambda Function URL: $FUNCTION_URL"
+          echo "CRON Lambda Function URL: $FUNCTION_URL"
 
   deploy-train:
     needs: detect-changes
@@ -467,9 +468,7 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt -t ./package
           cp -r src ./package/
-          cp -r alembic ./package/ 2>/dev/null || true
-          cp alembic.ini ./package/ 2>/dev/null || true
-      
+
       - name: Create deployment package
         working-directory: ./train/package
         run: |
@@ -499,11 +498,16 @@ jobs:
           aws lambda update-function-configuration \
             --function-name ${{ secrets.AWS_LAMBDA_TRAIN_FUNCTION_NAME }} \
             --environment "Variables={
-              R2_ACCOUNT_ID=${{ secrets.R2_ACCOUNT_ID }},
-              R2_ACCESS_KEY_ID=${{ secrets.R2_ACCESS_KEY_ID }},
-              R2_SECRET_ACCESS_KEY=${{ secrets.R2_SECRET_ACCESS_KEY }},
-              R2_BUCKET_NAME=${{ secrets.R2_BUCKET_NAME }},
-              OPENAI_API_KEY=${{ secrets.OPENAI_API_KEY }}
+              BUCKET_ACCOUNT_ID=${{ secrets.AWS_ACCOUNT_ID }},
+              BUCKET_ACCESS_KEY_ID=${{ secrets.AWS_ACCESS_KEY_ID }},
+              BUCKET_SECRET_ACCESS_KEY=${{ secrets.AWS_SECRET_ACCESS_KEY }},
+              BUCKET_NAME=${{ secrets.AWS_BUCKET_NAME }},
+              BUCKET_REGION=${{ secrets.AWS_REGION }},
+              OPENAI_API_KEY=${{ secrets.OPENAI_API_KEY }},
+              WARP_KEY=${{ secrets.WARP_KEY }},
+              SMTP_USERNAME=${{ secrets.SMTP_USERNAME }},
+              SMTP_PASSWORD=${{ secrets.SMTP_PASSWORD }},
+              SMTP_FROM_EMAIL=${{ secrets.SMTP_FROM_EMAIL }}
             }"
       
       - name: Get Function URL
@@ -537,8 +541,6 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt -t ./package
           cp -r src ./package/
-          cp -r alembic ./package/ 2>/dev/null || true
-          cp alembic.ini ./package/ 2>/dev/null || true
       
       - name: Create deployment package
         working-directory: ./ocr/package
@@ -569,11 +571,16 @@ jobs:
           aws lambda update-function-configuration \
             --function-name ${{ secrets.AWS_LAMBDA_OCR_FUNCTION_NAME }} \
             --environment "Variables={
-              R2_ACCOUNT_ID=${{ secrets.R2_ACCOUNT_ID }},
-              R2_ACCESS_KEY_ID=${{ secrets.R2_ACCESS_KEY_ID }},
-              R2_SECRET_ACCESS_KEY=${{ secrets.R2_SECRET_ACCESS_KEY }},
-              R2_BUCKET_NAME=${{ secrets.R2_BUCKET_NAME }},
-              OPENAI_API_KEY=${{ secrets.OPENAI_API_KEY }}
+              BUCKET_ACCOUNT_ID=${{ secrets.AWS_ACCOUNT_ID }},
+              BUCKET_ACCESS_KEY_ID=${{ secrets.AWS_ACCESS_KEY_ID }},
+              BUCKET_SECRET_ACCESS_KEY=${{ secrets.AWS_SECRET_ACCESS_KEY }},
+              BUCKET_NAME=${{ secrets.AWS_BUCKET_NAME }},
+              BUCKET_REGION=${{ secrets.AWS_REGION }},
+              OPENAI_API_KEY=${{ secrets.OPENAI_API_KEY }},
+              WARP_KEY=${{ secrets.WARP_KEY }},
+              SMTP_USERNAME=${{ secrets.SMTP_USERNAME }},
+              SMTP_PASSWORD=${{ secrets.SMTP_PASSWORD }},
+              SMTP_FROM_EMAIL=${{ secrets.SMTP_FROM_EMAIL }}
             }"
 
       - name: Get Function URL
@@ -607,8 +614,7 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt -t ./package
           cp -r src ./package/
-          cp -r alembic ./package/ 2>/dev/null || true
-          cp alembic.ini ./package/ 2>/dev/null || true
+
       
       - name: Create deployment package
         working-directory: ./predict/package
@@ -639,13 +645,18 @@ jobs:
           aws lambda update-function-configuration \
             --function-name ${{ secrets.AWS_LAMBDA_PREDICT_FUNCTION_NAME }} \
             --environment "Variables={
-              R2_ACCOUNT_ID=${{ secrets.R2_ACCOUNT_ID }},
-              R2_ACCESS_KEY_ID=${{ secrets.R2_ACCESS_KEY_ID }},
-              R2_SECRET_ACCESS_KEY=${{ secrets.R2_SECRET_ACCESS_KEY }},
-              R2_BUCKET_NAME=${{ secrets.R2_BUCKET_NAME }},
-              OPENAI_API_KEY=${{ secrets.OPENAI_API_KEY }}
+              BUCKET_ACCOUNT_ID=${{ secrets.AWS_ACCOUNT_ID }},
+              BUCKET_ACCESS_KEY_ID=${{ secrets.AWS_ACCESS_KEY_ID }},
+              BUCKET_SECRET_ACCESS_KEY=${{ secrets.AWS_SECRET_ACCESS_KEY }},
+              BUCKET_NAME=${{ secrets.AWS_BUCKET_NAME }},
+              BUCKET_REGION=${{ secrets.AWS_REGION }},
+              OPENAI_API_KEY=${{ secrets.OPENAI_API_KEY }},
+              WARP_KEY=${{ secrets.WARP_KEY }},
+              SMTP_USERNAME=${{ secrets.SMTP_USERNAME }},
+              SMTP_PASSWORD=${{ secrets.SMTP_PASSWORD }},
+              SMTP_FROM_EMAIL=${{ secrets.SMTP_FROM_EMAIL }}
             }"
-      
+
       - name: Get Function URL
         run: |
           FUNCTION_URL=$(aws lambda get-function-url-config \
