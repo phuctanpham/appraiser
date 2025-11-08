@@ -20,11 +20,11 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       
-      - uses: ./.github/actions/setup-python
+      - uses: ./.github/workflows/actions/setup-python.yml
         with:
           working-directory: ${{ inputs.working-directory }}
       
-      - uses: ./.github/actions/build-lambda-package
+      - uses: ./.github/workflows/actions/build-lambda-package.yml
         with:
           working-directory: ${{ inputs.working-directory }}
       
@@ -64,18 +64,28 @@ jobs:
       - name: Deploy to AWS Lambda
         working-directory: ${{ inputs.working-directory }}
         run: |
+          FUNCTION_NAME="AWS_LAMBDA_${{ inputs.function-name }}_FUNCTION_NAME"
+          FUNCTION_NAME="${FUNCTION_NAME^^}"
           aws lambda update-function-code \
-            --function-name ${{ inputs.function-name }} \
+            --function-name ${{ secrets[env.FUNCTION_NAME] }} \
             --zip-file fileb://deployment-package.zip
+        env:
+          FUNCTION_NAME: AWS_LAMBDA_${{ inputs.function-name }}_FUNCTION_NAME
       
       - name: Wait for update
         run: |
-          aws lambda wait function-updated --function-name ${{ inputs.function-name }}
+          FUNCTION_NAME="AWS_LAMBDA_${{ inputs.function-name }}_FUNCTION_NAME"
+          FUNCTION_NAME="${FUNCTION_NAME^^}"
+          aws lambda wait function-updated --function-name ${{ secrets[env.FUNCTION_NAME] }}
+        env:
+          FUNCTION_NAME: AWS_LAMBDA_${{ inputs.function-name }}_FUNCTION_NAME
       
       - name: Update configuration
         run: |
+          FUNCTION_NAME="AWS_LAMBDA_${{ inputs.function-name }}_FUNCTION_NAME"
+          FUNCTION_NAME="${FUNCTION_NAME^^}"
           aws lambda update-function-configuration \
-            --function-name ${{ inputs.function-name }} \
+            --function-name ${{ secrets[env.FUNCTION_NAME] }} \
             --timeout 900 \
             --memory-size 3000 \
             --environment "Variables={
@@ -100,8 +110,12 @@ jobs:
       
       - name: Get Function URL
         run: |
+          FUNCTION_NAME="AWS_LAMBDA_${{ inputs.function-name }}_FUNCTION_NAME"
+          FUNCTION_NAME="${FUNCTION_NAME^^}"
           FUNCTION_URL=$(aws lambda get-function-url-config \
-            --function-name ${{ inputs.function-name }} \
+            --function-name ${{ secrets[env.FUNCTION_NAME] }} \
             --query 'FunctionUrl' \
             --output text 2>/dev/null || echo "No Function URL configured")
           echo "🔗 Function URL: $FUNCTION_URL"
+        env:
+          FUNCTION_NAME: AWS_LAMBDA_${{ inputs.function-name }}_FUNCTION_NAME

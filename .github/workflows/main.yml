@@ -40,7 +40,7 @@ jobs:
   deploy-site:
     needs: detect-changes
     if: needs.detect-changes.outputs.site == 'true'
-    uses: ./.github/workflows/cloudflare-pages.yml
+    uses: ./.github/workflows/cloudflare-pages,yml
     secrets: inherit
     with:
       project-name: site
@@ -49,7 +49,7 @@ jobs:
   deploy-app:
     needs: detect-changes
     if: needs.detect-changes.outputs.app == 'true'
-    uses: ./.github/workflows/cloudflare-pages.yml
+    uses: ./.github/workflows/cloudflare-pages,yml
     secrets: inherit
     with:
       project-name: app
@@ -58,7 +58,7 @@ jobs:
   deploy-admin:
     needs: detect-changes
     if: needs.detect-changes.outputs.admin == 'true'
-    uses: ./.github/workflows/cloudflare-pages.yml
+    uses: ./.github/workflows/cloudflare-pages,yml
     secrets: inherit
     with:
       project-name: admin
@@ -86,7 +86,7 @@ jobs:
     uses: ./.github/workflows/aws-lambda.yml
     secrets: inherit
     with:
-      function-name: ${{ secrets.AWS_LAMBDA_WARP_FUNCTION_NAME }}
+      function-name: warp
       working-directory: ./warp
 
   deploy-cron:
@@ -95,7 +95,7 @@ jobs:
     uses: ./.github/workflows/aws-lambda.yml
     secrets: inherit
     with:
-      function-name: ${{ secrets.AWS_LAMBDA_CRON_FUNCTION_NAME }}
+      function-name: cron
       working-directory: ./cron
 
   deploy-train:
@@ -104,7 +104,7 @@ jobs:
     uses: ./.github/workflows/aws-lambda.yml
     secrets: inherit
     with:
-      function-name: ${{ secrets.AWS_LAMBDA_TRAIN_FUNCTION_NAME }}
+      function-name: train
       working-directory: ./train
 
   deploy-ocr:
@@ -113,7 +113,7 @@ jobs:
     uses: ./.github/workflows/aws-lambda.yml
     secrets: inherit
     with:
-      function-name: ${{ secrets.AWS_LAMBDA_OCR_FUNCTION_NAME }}
+      function-name: ocr
       working-directory: ./ocr
 
   deploy-predict:
@@ -122,6 +122,6 @@ jobs:
     uses: ./.github/workflows/aws-lambda.yml
     secrets: inherit
     with:
-      function-name: ${{ secrets.AWS_LAMBDA_PREDICT_FUNCTION_NAME }}
+      function-name: predict
       working-directory: ./predict
       download-model: true
