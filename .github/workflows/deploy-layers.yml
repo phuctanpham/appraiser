@@ -6,6 +6,7 @@ on:
     paths:
       - 'shared/*_requirement_layer.txt'
   workflow_dispatch:
+  workflow_call:
 
 jobs:
 
