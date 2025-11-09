@@ -153,13 +153,13 @@ jobs:
       
       - name: Upload to S3
         run: |
-          aws s3 cp layer.zip s3://${{ secrets.AWS_BUCKET_NAME }}/layers/${{ secrets.ML2_LAYER_NAME }}.zip
+          aws s3 cp layer.zip s3://${{ secrets.AWS_BUCKET_NAME }}/layers/${{ secrets.AWS_LAMBDA_ML2_LAYER_FUNCTION_NAME }}.zip
 
       - name: Publish layer
         run: |
           LAYER_ARN=$(aws lambda publish-layer-version \
-            --layer-name "${{ secrets.ML2_LAYER_NAME }}" \
-            --content S3Bucket=${{ secrets.AWS_BUCKET_NAME }},S3Key=layers/${{ secrets.ML2_LAYER_NAME }}.zip \
+            --layer-name "${{ secrets.AWS_LAMBDA_ML2_LAYER_FUNCTION_NAME }}" \
+            --content S3Bucket=${{ secrets.AWS_BUCKET_NAME }},S3Key=layers/${{ secrets.AWS_LAMBDA_ML2_LAYER_FUNCTION_NAME }}.zip \
             --compatible-runtimes python3.11 \
             --query 'LayerVersionArn' --output text)
           echo "✅ Published: $LAYER_ARN"
@@ -274,13 +274,13 @@ jobs:
       
       - name: Upload to S3
         run: |
-          aws s3 cp layer.zip s3://${{ secrets.AWS_BUCKET_NAME }}/layers/${{ secrets.OCR2_LAYER_NAME }}.zip
+          aws s3 cp layer.zip s3://${{ secrets.AWS_BUCKET_NAME }}/layers/${{ secrets.AWS_LAMBDA_OCR2_LAYER_FUNCTION_NAME }}.zip
 
       - name: Publish layer
         run: |
           LAYER_ARN=$(aws lambda publish-layer-version \
-            --layer-name "${{ secrets.OCR2_LAYER_NAME }}" \
-            --content S3Bucket=${{ secrets.AWS_BUCKET_NAME }},S3Key=layers/${{ secrets.OCR2_LAYER_NAME }}.zip \
+            --layer-name "${{ secrets.AWS_LAMBDA_OCR2_LAYER_FUNCTION_NAME }}" \
+            --content S3Bucket=${{ secrets.AWS_BUCKET_NAME }},S3Key=layers/${{ secrets.AWS_LAMBDA_OCR2_LAYER_FUNCTION_NAME }}.zip \
             --compatible-runtimes python3.11 \
             --query 'LayerVersionArn' --output text)
           echo "✅ Published: $LAYER_ARN"
