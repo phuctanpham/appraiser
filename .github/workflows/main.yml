@@ -94,7 +94,7 @@ jobs:
   deploy-cron:
     needs: detect-changes
     if: needs.detect-changes.outputs.cron == 'true'
-    uses: ./.github/workflows/aws-lambda.yml
+    uses: ./.github/workflows/aws-lambda-with-layer.yml
     secrets: inherit
     with:
       function-name: cron
@@ -103,7 +103,7 @@ jobs:
   deploy-train:
     needs: detect-changes
     if: needs.detect-changes.outputs.train == 'true'
-    uses: ./.github/workflows/aws-lambda.yml
+    uses: ./.github/workflows/aws-lambda-with-layer.yml
     secrets: inherit
     with:
       function-name: train
@@ -112,7 +112,7 @@ jobs:
   deploy-ocr:
     needs: detect-changes
     if: needs.detect-changes.outputs.ocr == 'true'
-    uses: ./.github/workflows/aws-lambda.yml
+    uses: ./.github/workflows/aws-lambda-with-layer.yml
     secrets: inherit
     with:
       function-name: ocr

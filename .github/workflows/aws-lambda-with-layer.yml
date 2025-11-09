@@ -24,10 +24,16 @@ jobs:
         with:
           python-version: '3.11'
       
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
+      
       - name: Get latest layer ARNs
         id: layers
         run: |
-          # Fetch latest layer versions
           SHARED=$(aws lambda list-layer-versions --layer-name shared --query 'LayerVersions[0].LayerVersionArn' --output text)
           ML1=$(aws lambda list-layer-versions --layer-name ml1 --query 'LayerVersions[0].LayerVersionArn' --output text)
           ML2=$(aws lambda list-layer-versions --layer-name ml2 --query 'LayerVersions[0].LayerVersionArn' --output text)
@@ -43,29 +49,16 @@ jobs:
           echo "OCR1_LAYER=$OCR1" >> $GITHUB_ENV
           echo "OCR2_LAYER=$OCR2" >> $GITHUB_ENV
           echo "OCR3_LAYER=$OCR3" >> $GITHUB_ENV
-        env:
-          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          AWS_DEFAULT_REGION: ${{ secrets.AWS_REGION }}
       
       - name: Build app package
         working-directory: ${{ inputs.working-directory }}
         run: |
           rm -rf ./package
           mkdir -p ./package
-          
-          pip install --platform manylinux2014_x86_64 --only-binary=:all: \
-            -r requirements.txt -t ./package
-          
+          python -m pip install --upgrade pip
+          pip install --platform manylinux2014_x86_64 --only-binary=:all: -r requirements.txt -t ./package
           [ -d "src" ] && cp -r src ./package/
           [ -f "lambda_handler.py" ] && cp lambda_handler.py ./package/
-      
-      - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v4
-        with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: ${{ secrets.AWS_REGION }}
       
       - name: Download model
         if: inputs.download-model
@@ -87,23 +80,21 @@ jobs:
           SIZE_BYTES=$(stat -c%s deployment.zip)
           SIZE_MB=$((SIZE_BYTES / 1024 / 1024))
           echo "📦 Package: ${SIZE_MB}MB"
-          
-          if [ $SIZE_BYTES -gt 52428800 ]; then
-            echo "❌ Package: ${SIZE_MB}MB (limit: 50MB)"
-            exit 1
-          fi
+      
+      - name: Upload to S3
+        working-directory: ${{ inputs.working-directory }}
+        run: |
+          aws s3 cp deployment.zip s3://${{ secrets.AWS_BUCKET_NAME }}/deployments/${{ inputs.function-name }}.zip
       
       - name: Determine layers
         id: determine-layers
         run: |
           FUNC_NAME="${{ inputs.function-name }}"
           
-          if [[ "$FUNC_NAME" == "warp" ]]; then
-            LAYERS="$SHARED_LAYER $OCR1_LAYER $OCR2_LAYER $OCR3_LAYER"
-          elif [[ "$FUNC_NAME" == "ocr" ]]; then
-            LAYERS="$SHARED_LAYER $OCR1_LAYER $OCR2_LAYER $OCR3_LAYER"
-          elif [[ "$FUNC_NAME" == "predict" ]] || [[ "$FUNC_NAME" == "train" ]] || [[ "$FUNC_NAME" == "cron" ]]; then
+          if [[ "$FUNC_NAME" == "predict" ]] || [[ "$FUNC_NAME" == "train" ]]; then
             LAYERS="$SHARED_LAYER $ML1_LAYER $ML2_LAYER $ML3_LAYER"
+          elif [[ "$FUNC_NAME" == "warp" ]] || [[ "$FUNC_NAME" == "cron" ]] || [[ "$FUNC_NAME" == "ocr" ]]; then
+            LAYERS="$SHARED_LAYER $OCR1_LAYER $OCR2_LAYER $OCR3_LAYER"
           else
             LAYERS="$SHARED_LAYER"
           fi
@@ -112,13 +103,13 @@ jobs:
           echo "✅ Layers: $LAYERS"
       
       - name: Update function code
-        working-directory: ${{ inputs.working-directory }}
         run: |
           FUNC="${{ secrets[format('AWS_LAMBDA_{0}_FUNCTION_NAME', inputs.function-name)] }}"
           
           aws lambda update-function-code \
             --function-name "$FUNC" \
-            --zip-file fileb://deployment.zip
+            --s3-bucket ${{ secrets.AWS_BUCKET_NAME }} \
+            --s3-key deployments/${{ inputs.function-name }}.zip
           
           aws lambda wait function-updated --function-name "$FUNC"
       
