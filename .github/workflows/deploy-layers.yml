@@ -4,7 +4,7 @@ on:
   push:
     branches: [main]
     paths:
-      - 'shared/*_requirement_layer.txt'
+      - 'shared/**'
   workflow_dispatch:
   workflow_call:
 
