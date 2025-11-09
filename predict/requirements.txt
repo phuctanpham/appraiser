@@ -1,5 +1,4 @@
-shap
-tabulate
-cloudpickle
-packaging
-slicer
+boto3==1.34.34
+sqlalchemy==2.0.25
+psycopg2-binary==2.9.9
+alembic==1.13.1

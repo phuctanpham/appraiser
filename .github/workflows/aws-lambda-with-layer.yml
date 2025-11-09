@@ -58,10 +58,7 @@ jobs:
           python -m pip install --upgrade pip
           
           echo "📦 Installing dependencies..."
-          pip install --platform manylinux2014_x86_64 --only-binary=:all: -r requirements.txt -t ./package 2>&1 | tee pip.log || {
-            echo "❌ Pip install failed. Trying without --only-binary..."
-            pip install --platform manylinux2014_x86_64 -r requirements.txt -t ./package
-          }
+          pip install --platform manylinux2014_x86_64 --only-binary=:all: -r requirements.txt -t ./package
           
           echo "📁 Copying source files..."
           if [ -d "src" ]; then
@@ -89,6 +86,8 @@ jobs:
           find . -type d -name "__pycache__" -exec rm -rf {} + 2>/dev/null || true
           find . -type d -name "*.dist-info" -exec rm -rf {} + 2>/dev/null || true
           find . -type f -name "*.pyc" -delete
+          find . -type d -name "tests" -exec rm -rf {} + 2>/dev/null || true
+          find . -type f -name "*.so" -exec strip {} + 2>/dev/null || true
           zip -r9 ../deployment.zip .
       
       - name: Check size
@@ -121,7 +120,8 @@ jobs:
       
       - name: Update function code
         run: |
-          FUNC="${{ secrets[format('AWS_LAMBDA_{0}_FUNCTION_NAME', inputs.function-name)] }}"
+          FUNC_NAME_UPPER=$(echo "${{ inputs.function-name }}" | tr '[:lower:]' '[:upper:]')
+          FUNC="${{ secrets[format('AWS_LAMBDA_{0}_FUNCTION_NAME', '$FUNC_NAME_UPPER')] }}"
           
           aws lambda update-function-code \
             --function-name "$FUNC" \
@@ -139,4 +139,4 @@ jobs:
             --layers $LAYERS \
             --timeout 900 \
             --memory-size 3008 \
-            --environment "Variables={MODEL_PATH=/var/task/lightgbm_model.txt,DATABASE_URL=${{ secrets.DATABASE_URL }},BUCKET_ACCOUNT_ID=${{ secrets.AWS_ACCOUNT_ID }},BUCKET_ACCESS_KEY_ID=${{ secrets.AWS_ACCESS_KEY_ID }},BUCKET_SECRET_ACCESS_KEY=${{ secrets.AWS_SECRET_ACCESS_KEY }},BUCKET_NAME=${{ secrets.AWS_BUCKET_NAME }},BUCKET_REGION=${{ secrets.AWS_REGION }},OPENAI_API_KEY=${{ secrets.OPENAI_API_KEY }},WARP_KEY=${{ secrets.WARP_KEY }},SMTP_HOST=${{ secrets.SMTP_HOST }},SMTP_PORT=${{ secrets.SMTP_PORT }},SMTP_USERNAME=${{ secrets.SMTP_USERNAME }},SMTP_PASSWORD=${{ secrets.SMTP_PASSWORD }},SMTP_FROM_EMAIL=${{ secrets.SMTP_FROM_EMAIL }},SMTP_FROM_NAME=${{ secrets.SMTP_FROM_NAME }},ADMIN_URL=${{ secrets.ADMIN_URL }},WARP_URL=${{ secrets.WARP_URL }}}"
+            --environment Variables={MODEL_PATH=/var/task/lightgbm_model.txt,DATABASE_URL=${{ secrets.DATABASE_URL }},BUCKET_ACCOUNT_ID=${{ secrets.AWS_ACCOUNT_ID }},BUCKET_ACCESS_KEY_ID=${{ secrets.AWS_ACCESS_KEY_ID }},BUCKET_SECRET_ACCESS_KEY=${{ secrets.AWS_SECRET_ACCESS_KEY }},BUCKET_NAME=${{ secrets.AWS_BUCKET_NAME }},BUCKET_REGION=${{ secrets.AWS_REGION }},OPENAI_API_KEY=${{ secrets.OPENAI_API_KEY }},WARP_KEY=${{ secrets.WARP_KEY }},SMTP_HOST=${{ secrets.SMTP_HOST }},SMTP_PORT=${{ secrets.SMTP_PORT }},SMTP_USERNAME=${{ secrets.SMTP_USERNAME }},SMTP_PASSWORD=${{ secrets.SMTP_PASSWORD }},SMTP_FROM_EMAIL=${{ secrets.SMTP_FROM_EMAIL }},SMTP_FROM_NAME=${{ secrets.SMTP_FROM_NAME }},ADMIN_URL=${{ secrets.ADMIN_URL }},WARP_URL=${{ secrets.WARP_URL }}}
