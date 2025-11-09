@@ -56,9 +56,26 @@ jobs:
           rm -rf ./package
           mkdir -p ./package
           python -m pip install --upgrade pip
-          pip install --platform manylinux2014_x86_64 --only-binary=:all: -r requirements.txt -t ./package
-          [ -d "src" ] && cp -r src ./package/
-          [ -f "lambda_handler.py" ] && cp lambda_handler.py ./package/
+          
+          echo "📦 Installing dependencies..."
+          pip install --platform manylinux2014_x86_64 --only-binary=:all: -r requirements.txt -t ./package 2>&1 | tee pip.log || {
+            echo "❌ Pip install failed. Trying without --only-binary..."
+            pip install --platform manylinux2014_x86_64 -r requirements.txt -t ./package
+          }
+          
+          echo "📁 Copying source files..."
+          if [ -d "src" ]; then
+            cp -r src ./package/
+            echo "✅ Copied src/"
+          fi
+          
+          if [ -f "lambda_handler.py" ]; then
+            cp lambda_handler.py ./package/
+            echo "✅ Copied lambda_handler.py"
+          fi
+          
+          echo "📋 Package contents:"
+          ls -la ./package/
       
       - name: Download model
         if: inputs.download-model
