@@ -1,2 +1,3 @@
+# layer for ocr,warp and cron
 Pillow==10.1.0
 numpy==1.26.2

@@ -246,7 +246,7 @@ jobs:
         run: |
           mkdir -p layer/python
           pip install --platform manylinux2014_x86_64 --only-binary=:all: \
-            -r shared/ocr_requirement_layer_3.txt -t layer/python
+            -r shared/ocr_requirement_layer_2.txt -t layer/python
           
           # Remove unnecessary files
           find layer/python -type d -name "tests" -exec rm -rf {} + 2>/dev/null || true
