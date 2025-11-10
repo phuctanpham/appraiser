@@ -129,12 +129,10 @@ function App() {
           setAppState('login');
         } else {
           setAppState('main');
-          setIsLoggedIn(false);
         }
       } catch (error) {
         console.error('App initialization failed:', error);
         setAppState('main');
-        setIsLoggedIn(false);
       }
     };
 
@@ -184,7 +182,6 @@ function App() {
       console.log('Logging in with:', email, 'to', config.authEndpoint);
       
       // On successful login
-      setIsLoggedIn(true);
       setAppState('main');
       
       // Clear mock data and load user data
