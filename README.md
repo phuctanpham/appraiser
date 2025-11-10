@@ -6,7 +6,7 @@
 
 **Bên dưới là các trang được sử dụng:**
 ```
-app: appraiser.pages.dev  
+admin: appraiser.pages.dev  
 app: valumind.pages.dev  
 api: api.vpbank.workers.dev  
 auth: auth.vpbank.workers.dev  
@@ -19,8 +19,8 @@ auth: auth.vpbank.workers.dev
 1. Tổng quan kiến trúc
 2. Cấu trúc thư mục
 3. Chi tiết các microservices' module
-4. Kiến trúc Monorepos CI/CD
-5. Kiến trúc Multi shared AWS Lambda Layer MLops 
+4. Kiến trúc Monorepos driven Devsecops
+5. Kiến trúc Shared Layers driven MLops
 6. Cài đặt môi trường
 7. Sơ đồ kiến trúc tổng thể
 ```
@@ -161,7 +161,7 @@ auth/
 **Production**: AWS Lambda Function
 
 #### 3.5. Warp - AI Gateway
-****Mục đích****: Tăng cường bảo mật kiểm toán tất cả dữ liệu ra vào các worker AI bên dưới  
+**Mục đích**: Tăng cường bảo mật kiểm toán tất cả dữ liệu ra vào các worker AI bên dưới  
 **Công nghệ**: Python 3.11 + FastAPI + SQLAlchemy + JWT  
 **Cấu trúc**:   
 ```
@@ -276,7 +276,7 @@ predict/
 **Deployment**:CLoudflare Worker AI + Cloudflare R2  
 **Production**: AWS Lambda Function + Model từ S3  
 
-### 3.10. Shared - Multi AWS Lambda Layer Architecture  
+#### 3.10. Shared - Packages for Shared Layers driven MLops Architecture  
 **Mục đích**: Chia sẻ dependencies giữa các Lambda functions để giảm deployment size  
 **Công nghệ**: Python packages precompiled cho `manylinux2014_x86_64`  
 **Cấu trúc**:  
@@ -303,7 +303,7 @@ shared/
 * Chia sẻ dependencies chung
 * Tránh cold start lâu
 
-#### 3.11. .github - Monorepo CI/CD Architecture
+#### 3.11. .github - CI/CD of Monorepos driven Devsecops Architecture
 **Mục đích**: DevSecOps pipeline tự động không để lộ secrets giữa các repos  
 **Công nghệ**: GitHub Actions + Reusable Workflows  
 **Cấu trúc**:  
@@ -322,71 +322,9 @@ shared/
   }
 }
 ```
+**Deployment**: github action + aws cli + cloudflare cli  
 
-**Port mặc định**: `8004`
-
-**Deployment**: AWS Lambda với ML Layers + Model từ S3
-
----
-
-#### 3.10. Shared - Multi AWS Lambda Layer Architecture
-
-**Mục đích**: Chia sẻ dependencies giữa các Lambda functions để giảm deployment size
-
-**Công nghệ**: Python packages precompiled cho `manylinux2014_x86_64`
-
-**Cấu trúc**:
-```
-shared/
-├── shared_requirement_layer.txt      # FastAPI, Pydantic (tất cả services)
-├── ml_requirement_layer_1.txt        # Pandas, Numpy
-├── ml_requirement_layer_2.txt        # LightGBM, Scikit-learn
-├── ml_requirement_layer_3.txt        # Matplotlib, Geopy
-├── ml_requirement_layer_4.txt        # Tabulate, Cloudpickle
-├── ml_requirement_layer_5.txt        # SHAP
-├── ocr_requirement_layer_1.txt       # Pillow, Numpy
-├── ocr_requirement_layer_2.txt       # OpenCV
-└── ocr_requirement_layer_3.txt       # OpenAI
-```
-
-**Layers mapping**:
-- **predict** và **train**: `shared` + `ml1` + `ml2` + `ml3` + `ml4` + `ml5`
-- **ocr**, **warp**, **cron**: `shared` + `ocr1` + `ocr2` + `ocr3`
-
-**Lợi ích**:
-- Giảm deployment package size (từ 500MB → 50MB)
-- Deploy nhanh hơn
-- Chia sẻ dependencies chung
-- Tránh cold start lâu
-
----
-
-#### 3.11. .github - Monorepo CI/CD Architecture
-
-**Mục đích**: DevSecOps pipeline tự động không để lộ secrets giữa các repos
-
-**Công nghệ**: GitHub Actions + Reusable Workflows
-
-**Cấu trúc**:
-```
-.github/
-├── actions/                          # Reusable Actions
-│   ├── build-lambda-package/         # Build Lambda ZIP
-│   ├── setup-node/                   # Setup Node.js
-│   └── setup-python/                 # Setup Python
-├── utils/                            # Verification Scripts
-│   ├── aws-lambda.sh                 # Verify AWS Lambda
-│   ├── cloudflare.sh                 # Verify Cloudflare
-│   └── build-layer.sh                # Build Lambda Layer
-└── workflows/                        # GitHub Actions Workflows
-    ├── main.yml                      # Main CI/CD
-    ├── deploy-layers.yml             # Deploy Layers
-    ├── aws-lambda.yml                # Deploy Lambda (single)
-    ├── aws-lambda-with-layer.yml     # Deploy Lambda (with layers)
-    ├── cloudflare-pages.yml          # Deploy CF Pages
-    └── cloudflare-workers.yml        # Deploy CF Workers
-```
-### 4. Kiến trúc CI/CD
+### 4. Kiến trúc Monorepos drive Devsecops
 #### 4.1. Main Workflow 
 **Workflow:** `main.yml`  
 **Trigger:** Push/PR to main branch  
@@ -439,7 +377,7 @@ elif function == "warp" or "cron" or "ocr":
 
 #### 4.3. Cloudflare Deployment
 **Workflow:** `cloudflare-pages.yml`  
-*Trigger:** frontend directories change in branch `test`    
+**Trigger:** frontend directories change in branch `test`    
 **Steps:**  
 ```
 1. Checkout code
@@ -488,15 +426,12 @@ SMTP_FROM_NAME
 ADMIN_URL
 WARP_URL
 ```
-
----
-
-## 5. Kiến trúc AWS Lambda Layer
+## 5. Kiến trúc Shared Layers driven MLops
 
 ### 5.1. Tại sao cần Layers?
 
 **Vấn đề**: Lambda deployment package giới hạn 250MB (direct), 50MB (compressed)
-
+L
 **Giải pháp**: Tách dependencies thành Layers (tối đa 5 layers/function, 250MB/layer)
 
 ### 5.2. Layer Strategy
@@ -518,162 +453,12 @@ Layer 4: tabulate, cloudpickle, packaging, slicer
 Layer 5: shap
 ```
 
-**OCR Layers** (cho ocr/warp/cron):
-```
-# AWS
-AWS_ACCESS_KEY_ID
-AWS_SECRET_ACCESS_KEY
-AWS_REGION
-AWS_BUCKET_NAME
-AWS_ACCOUNT_ID
-
-# Lambda Functions
-AWS_LAMBDA_PREDICT_FUNCTION_NAME
-AWS_LAMBDA_TRAIN_FUNCTION_NAME
-AWS_LAMBDA_WARP_FUNCTION_NAME
-AWS_LAMBDA_CRON_FUNCTION_NAME
-AWS_LAMBDA_OCR_FUNCTION_NAME
-
-# Cloudflare
-CLOUDFLARE_API_TOKEN
-CLOUDFLARE_ACCOUNT_ID
-
-# Database
-DATABASE_URL
-
-# APIs
-OPENAI_API_KEY
-
-# Email
-SMTP_HOST
-SMTP_PORT
-SMTP_USERNAME
-SMTP_PASSWORD
-SMTP_FROM_EMAIL
-SMTP_FROM_NAME
-
-# URLs
-ADMIN_URL
-WARP_URL
-```
-
----
-
-## 5. Kiến trúc AWS Lambda Layer
-
-### 5.1. Tại sao cần Layers?
-
-**Vấn đề**: Lambda deployment package giới hạn 250MB (direct), 50MB (compressed)
-
-**Giải pháp**: Tách dependencies thành Layers (tối đa 5 layers/function, 250MB/layer)
-
-### 5.2. Layer Strategy
-
-**Shared Layer** (cho tất cả):
-```
-fastapi==0.104.1
-mangum==0.17.0
-pydantic==2.5.0
-python-dotenv==1.0.0
-```
-
-**ML Layers** (cho train/predict):
-```
-Layer 1: pandas, numpy
-Layer 2: lightgbm, scikit-learn
-Layer 3: matplotlib, geopy, joblib
-Layer 4: tabulate, cloudpickle, packaging, slicer
-Layer 5: shap
-```
-
-**OCR Layers** (cho ocr/warp/cron):
-```
-# AWS
-AWS_ACCESS_KEY_ID
-AWS_SECRET_ACCESS_KEY
-AWS_REGION
-AWS_BUCKET_NAME
-AWS_ACCOUNT_ID
-
-# Lambda Functions
-AWS_LAMBDA_PREDICT_FUNCTION_NAME
-AWS_LAMBDA_TRAIN_FUNCTION_NAME
-AWS_LAMBDA_WARP_FUNCTION_NAME
-AWS_LAMBDA_CRON_FUNCTION_NAME
-AWS_LAMBDA_OCR_FUNCTION_NAME
-
-# Cloudflare
-CLOUDFLARE_API_TOKEN
-CLOUDFLARE_ACCOUNT_ID
-
-# Database
-DATABASE_URL
-
-# APIs
-OPENAI_API_KEY
-
-# Email
-SMTP_HOST
-SMTP_PORT
-SMTP_USERNAME
-SMTP_PASSWORD
-SMTP_FROM_EMAIL
-SMTP_FROM_NAME
-
-# URLs
-ADMIN_URL
-WARP_URL
-```
-
-### 5. Kiến trúc AWS Lambda Layer
-
-#### 5.1. Tại sao cần Layers?
-**Vấn đề**: Lambda deployment package giới hạn 250MB (direct), 50MB (compressed)  
-**Giải pháp**: Tách dependencies thành Layers (tối đa 5 layers/function, 250MB/layer)  
-
-#### 5.2. Layer Strategy
-**Shared Layer** (cho tất cả):  
-```
-fastapi==0.104.1
-mangum==0.17.0
-pydantic==2.5.0
-python-dotenv==1.0.0
-```
-**ML Layers** (cho train/predict):
-```
-Layer 1: pandas, numpy
-Layer 2: lightgbm, scikit-learn
-Layer 3: matplotlib, geopy, joblib
-Layer 4: tabulate, cloudpickle, packaging, slicer
-Layer 5: shap
-```
 **OCR Layers** (cho ocr/warp/cron):
 ```
 Layer 1: Pillow, numpy
 Layer 2: opencv-python-headless
 Layer 3: openai
 ```
-#### 5.3. Build Process (using below script if manually upload package into aws lambdalayer)
-Script: `.github/utils/build-layer.sh`  
-```
-#!/bin/bash
-SERVICE=$1
-
-mkdir -p layer/python
-pip install -r shared/${SERVICE}_requirement_layer.txt \
-    -t layer/python \
-    --platform manylinux2014_x86_64 \
-    --only-binary=:all:
-
-cd layer
-zip -r9 ../layer.zip .
-
-aws lambda publish-layer-version \
-    --layer-name ${SERVICE}-deps \
-    --zip-file fileb://layer.zip \
-    --compatible-runtimes python3.11
-```
-
 ### 6. Cài đặt môi trường localhost
 #### 6.1. Environment Variables
 Tạo file `.env` ở root:  
