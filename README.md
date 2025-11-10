@@ -11,7 +11,7 @@ auth: auth.vpbank.workers.dev
 
 ### I/ Tài liệu kỹ thuật
 
-'''
+```
 📋 Mục lục
 
 1. Tổng quan kiến trúc
@@ -21,7 +21,7 @@ auth: auth.vpbank.workers.dev
 5. Kiến trúc AWS Lambda Layer
 6. Cài đặt môi trường
 7. Sơ đồ kiến trúc tổng thể
-'''
+```
 
 #### 1. Tổng quan kiến trúc
 
@@ -64,7 +64,7 @@ Mục đích: Cổng web bảo mật cho nhân viên ngân hàng xem xét hồ s
 Công nghệ: React 19 + Next.js 16 + Tailwind CSS  
 Cấu trúc:  
 
-'''
+```
 admin/
 ├── app/                   # Next.js App Router
 │   ├── globals.css       # Global styles
@@ -77,7 +77,7 @@ admin/
 ├── public/              # Static assets
 ├── next.config.mjs      # Next.js config
 └── package.json
-'''
+```
 
 Tính năng chính:
 
@@ -87,7 +87,7 @@ Tính năng chính:
 * Xem chi tiết báo cáo định giá
 * Quản lý hồ sơ vay vốn
 
-Port mặc định: 3000
+Port mặc định: 3000  
 Deployment: Cloudflare Pages (Next Build)
 Production: AWS Amplify (Static Export)
 
@@ -97,7 +97,7 @@ Mục đích: Ứng dụng di động cho người vay định giá tài sản t
 Công nghệ: React 19 + Vite + PWA + Google Maps  
 Cấu trúc:  
 
-'''
+```
 app/
 ├── src/
 │   ├── components/       # React Components
@@ -113,7 +113,7 @@ app/
 │   └── mock.json        # Mock data
 ├── vite.config.ts       # Vite + PWA config
 └── package.json
-'''
+```
 
 Tính năng chính:
 
