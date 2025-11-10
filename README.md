@@ -1,6 +1,6 @@
-# Valumind
+## Valumind
 
-## Tóm tắt luồng sử dụng: đăng nhập trang appraiser (ngân hàng) hoặc trang valumind (người vay) để gửi hình ảnh và thông tin tài sản, ứng dụng sẽ tạo định giá bằng AI được dạy từ các nguồn dữ liệu ở chợ tốt, bất động sản, ... Bên dưới là các trang được sử dụng:
+Tóm tắt luồng sử dụng: đăng nhập trang appraiser (ngân hàng) hoặc trang valumind (người vay) để gửi hình ảnh và thông tin tài sản, ứng dụng sẽ tạo định giá bằng AI được dạy từ các nguồn dữ liệu ở chợ tốt, bất động sản, ... Bên dưới là các trang được sử dụng:  
 
 ```
 app: appraiser.pages.dev  
