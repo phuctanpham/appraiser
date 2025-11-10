@@ -72,7 +72,6 @@ type AppState = 'loading' | 'login' | 'main';
 
 function App() {
   const [appState, setAppState] = useState<AppState>('loading');
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [config, setConfig] = useState<EndpointsConfig | null>(null);
   const [loadingProgress, setLoadingProgress] = useState(0);
   
