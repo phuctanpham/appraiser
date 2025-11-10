@@ -37,7 +37,7 @@ Các thành phần chính:
 
 #### 2. Cấu trúc thư mục
 
-'''
+```
 ./
 ├── admin/                 # Web Admin SPA
 ├── app/                   # Mobile PWA
@@ -55,7 +55,7 @@ Các thành phần chính:
 │   └── workflows/         # GitHub Actions
 ├── testCICD.sh           # Local CI/CD Testing
 └── README.md
-'''
+```
 
 #### 3. Chi tiết các module
 
