@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import TopBar from './components/TopBar';
 import LeftColumn from './components/LeftColumn';
@@ -70,11 +69,10 @@ export interface CellItem {
 
 type Data = { [key: string]: CellItem };
 type AppState = 'loading' | 'login' | 'main';
-type AuthMode = 'guest' | 'authenticated';
 
 function App() {
   const [appState, setAppState] = useState<AppState>('loading');
-  const [authMode, setAuthMode] = useState<AuthMode>('guest');
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [config, setConfig] = useState<EndpointsConfig | null>(null);
   const [loadingProgress, setLoadingProgress] = useState(0);
   
@@ -111,12 +109,13 @@ function App() {
           setTimeout(() => resolve(true), 2000);
         });
 
+        // Load mock data for not-logged-in users
         const savedItems = localStorage.getItem('items');
         if (savedItems) {
           const parsedItems = JSON.parse(savedItems);
           setItems(parsedItems);
           setSelectedItemId(Object.keys(parsedItems)[0] || null);
-        } else if (authMode === 'guest') {
+        } else {
           const response = await fetch('/mock.json');
           const data = await response.json();
           setItems(data);
@@ -126,20 +125,22 @@ function App() {
         setLoadingProgress(100);
         await new Promise(resolve => setTimeout(resolve, 500));
 
-        if (endpointsData.IDENTITY_PROVIDER_CONFIG && authMode === 'guest') {
+        // Check if endpoints are configured for login
+        if (endpointsData.IDENTITY_PROVIDER_CONFIG && endpointsData.apiEndpoint && endpointsData.authEndpoint) {
           setAppState('login');
         } else {
           setAppState('main');
+          setIsLoggedIn(false);
         }
       } catch (error) {
         console.error('App initialization failed:', error);
-        setAuthMode('guest');
         setAppState('main');
+        setIsLoggedIn(false);
       }
     };
 
     initApp();
-  }, [authMode]);
+  }, []);
 
   // Handle responsive layout and gestures
   useEffect(() => {
@@ -172,15 +173,31 @@ function App() {
     };
   }, [isMobile, mobileColumn]);
 
-  const handleLogin = (mode: AuthMode) => {
-    setAuthMode(mode);
-    setAppState('main');
+  const handleLogin = async (email: string) => {
+    // TODO: Implement actual login logic with authEndpoint
+    if (!config?.authEndpoint || !config?.apiEndpoint) {
+      alert('Authentication endpoints not configured');
+      return;
+    }
+
+    try {
+      // Placeholder for actual API call
+      console.log('Logging in with:', email, 'to', config.authEndpoint);
+      
+      // On successful login
+      setIsLoggedIn(true);
+      setAppState('main');
+      
+      // Clear mock data and load user data
+      setItems({});
+      // TODO: Load user's actual data from API
+    } catch (error) {
+      console.error('Login failed:', error);
+      alert('Login failed. Please try again.');
+    }
   };
 
   const handleAddItem = (newItem: Omit<CellItem, 'id' | 'syncStatus'>) => {
-    if (authMode === 'guest' && Object.keys(items).length >= 3) {
-      return;
-    }
     const id = `item-${Date.now()}`;
     const item: CellItem = {
       id,
@@ -251,19 +268,21 @@ function App() {
           </>
         )}
       </div>
-      <FloatingBubble authMode={authMode} onAdd={handleAddItem} onLoginRequest={() => setAppState('login')} itemsLength={itemsArray.length} />
+      <FloatingBubble isLoggedIn={isLoggedIn} onAdd={handleAddItem} onLoginRequest={() => setAppState('login')} />
       
       {appState === 'login' && (
         <div className="notification-modal">
           <div className="notification-content">
             <img src="/logo.svg" alt="Logo" className="login-logo" />
             <h2>Welcome</h2>
+            <p>Please log in to access your data</p>
             <div className="login-form">
-              <input type="email" placeholder="Enter your email" className="login-input" />
-              <button className="login-button">Send OTP</button>
-              <div className="login-divider">or</div>
-              <button className="guest-button" onClick={() => handleLogin('guest')}>Continue as Guest</button>
-              <button className="btn" onClick={() => setAppState('main')}>Cancel</button>
+              <input type="email" id="login-email" placeholder="Enter your email" className="login-input" />
+              <button className="login-button" onClick={() => {
+                const email = (document.getElementById('login-email') as HTMLInputElement).value;
+                handleLogin(email);
+              }}>Send OTP</button>
+              <button className="btn" onClick={() => setAppState('main')}>Continue Without Login</button>
             </div>
           </div>
         </div>

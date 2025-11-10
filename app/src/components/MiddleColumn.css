@@ -39,8 +39,8 @@
 }
 
 .tab-button.active {
-  border-bottom-color: #646cff;
-  color: #646cff;
+  border-bottom-color: #4CAF50;
+  color: #4CAF50;
 }
 
 .tab-content {

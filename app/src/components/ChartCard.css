@@ -37,8 +37,8 @@
 }
 
 .view-switcher button.active, .filter-buttons button.active {
-  background-color: #646cff;
-  border-color: #646cff;
+  background-color: #4CAF50;
+  border-color: #4CAF50;
 }
 
 .chart-container {

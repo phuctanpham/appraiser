@@ -3,20 +3,17 @@ import type { CellItem } from '../App';
 import './FloatingBubble.css';
 
 interface FloatingBubbleProps {
-  authMode: 'guest' | 'authenticated';
+  isLoggedIn: boolean;
   onAdd: (item: Omit<CellItem, 'id' | 'syncStatus'>) => void;
   onLoginRequest: () => void;
-  itemsLength: number;
 }
 
 export default function FloatingBubble({
-  authMode,
+  isLoggedIn,
   onAdd,
   onLoginRequest,
-  itemsLength,
 }: FloatingBubbleProps) {
   const [showModal, setShowModal] = useState(false);
-  const [showGuestNotification, setShowGuestNotification] = useState(false);
   const [formData, setFormData] = useState({
     avatar: '',
     address: '',
@@ -25,11 +22,7 @@ export default function FloatingBubble({
   });
 
   const handleClick = () => {
-    if (authMode === 'guest' && itemsLength > 0) {
-      setShowGuestNotification(true);
-    } else {
-      setShowModal(true);
-    }
+    setShowModal(true);
   };
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -77,23 +70,6 @@ export default function FloatingBubble({
           <path d="M12 5v14M5 12h14" strokeWidth="2" strokeLinecap="round" />
         </svg>
       </button>
-
-      {showGuestNotification && (
-        <div className="notification-modal">
-          <div className="notification-content">
-            <h3>Guest Mode</h3>
-            <p>New creation is litmited in guest mode. Please log in to add items.</p>
-            <div className="notification-actions">
-              <button className="btn btn-primary" onClick={onLoginRequest}>
-                Login
-              </button>
-              <button className="btn" onClick={() => setShowGuestNotification(false)}>
-                Cancel
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
 
       {showModal && (
         <div className="add-modal">

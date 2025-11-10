@@ -36,7 +36,7 @@
   }
   
   .search-input:focus {
-    outline: 2px solid #646cff;
+    outline: 2px solid #4CAF50;
     outline-offset: 0;
   }
   
@@ -60,6 +60,6 @@
   }
   
   .menu-button:focus {
-    outline: 2px solid #646cff;
+    outline: 2px solid #4CAF50;
     outline-offset: 2px;
   }
