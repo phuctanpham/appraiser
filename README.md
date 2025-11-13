@@ -42,7 +42,7 @@ Hệ thống AI Asset Valuation là một nền tảng định giá tài sản t
 ├── app/                   # Mobile PWA
 ├── api/                   # API Gateway
 ├── auth/                  # IAM Service
-├── warp/                  # Middle Gateway
+├── warp/                  # AIAI Gateway
 ├── ocr/                   # OCR Service
 ├── cron/                  # Data Crawling
 ├── train/                 # ML Training
